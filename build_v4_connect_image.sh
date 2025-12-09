@@ -17,7 +17,7 @@ git clone --depth 1 --branch "${CHATWOOT_VERSION}" https://github.com/chatwoot/c
 
 echo "Aplicando patch de templates (super_admin PT-BR)..."
 cd "${WORKDIR}"
-git apply "${BUILD_ROOT}/v4-connect.patch"
+git apply "${BUILD_ROOT}/patches/v4-connect.patch"
 
 echo "Aplicando tradução do onboarding para PT-BR..."
 ONBOARDING_FILE="app/views/installation/onboarding/index.html.erb"
@@ -203,7 +203,7 @@ sed -i '/^RUN git rev-parse HEAD > \/app\/.git_sha$/d' docker/Dockerfile
 
 echo "Copiando brand-assets (logos/favicons)..."
 mkdir -p "${WORKDIR}/public/brand-assets"
-cp -r "${BUILD_ROOT}/../brand-assets/." "${WORKDIR}/public/brand-assets/"
+cp -r "${BUILD_ROOT}/branding/." "${WORKDIR}/public/brand-assets/"
 
 echo "Construindo imagem ${IMAGE_TAG} (sem cache)..."
 docker build \
