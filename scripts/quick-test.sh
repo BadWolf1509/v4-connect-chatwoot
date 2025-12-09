@@ -41,6 +41,15 @@ for file in "${REQUIRED_FILES[@]}"; do
     fi
 done
 
+# Validar locale files
+echo "→ Validando locale files..."
+if [ -f "${PROJECT_DIR}/locales/super_admin.pt-BR.yml" ]; then
+    echo "  ✓ super_admin.pt-BR.yml"
+else
+    echo "  ✗ super_admin.pt-BR.yml não encontrado!"
+    exit 1
+fi
+
 # Validar build script
 echo "→ Validando build script..."
 if bash -n "${PROJECT_DIR}/build_v4_connect_image.sh"; then
