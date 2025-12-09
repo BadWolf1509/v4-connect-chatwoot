@@ -1,0 +1,60 @@
+version: '3.8'
+
+# Docker Compose para desenvolvimento local do V4 Connect
+# Para produção, use Docker Swarm com o stack existente
+
+services:
+  chatwoot-web:
+    image: v4-connect/chatwoot:v4.8.0-branded
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - RAILS_ENV=development
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE:-development_secret_key}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DATABASE=chatwoot_dev
+      - POSTGRES_USERNAME=chatwoot
+      - POSTGRES_PASSWORD=chatwoot
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - storage:/app/storage
+
+  chatwoot-worker:
+    image: v4-connect/chatwoot:v4.8.0-branded
+    command: bundle exec sidekiq -C config/sidekiq.yml
+    environment:
+      - RAILS_ENV=development
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE:-development_secret_key}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DATABASE=chatwoot_dev
+      - POSTGRES_USERNAME=chatwoot
+      - POSTGRES_PASSWORD=chatwoot
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:14
+    environment:
+      - POSTGRES_USER=chatwoot
+      - POSTGRES_PASSWORD=chatwoot
+      - POSTGRES_DB=chatwoot_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+
+volumes:
+  storage:
+  postgres_data:
+  redis_data:
