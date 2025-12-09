@@ -15,7 +15,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build:
@@ -27,6 +26,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set lowercase image name
+        id: image_name
+        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -43,7 +46,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ steps.image_name.outputs.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -54,7 +57,7 @@ jobs:
       - name: Build V4 Connect Image
         env:
           CHATWOOT_VERSION: ${{ github.event.inputs.chatwoot_version || 'v4.8.0' }}
-          IMAGE_TAG: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          IMAGE_TAG: ${{ env.REGISTRY }}/${{ steps.image_name.outputs.IMAGE_NAME }}:${{ github.sha }}
         run: |
           chmod +x ./build_v4_connect_image.sh
           ./build_v4_connect_image.sh
@@ -62,9 +65,10 @@ jobs:
       - name: Push image
         if: github.event_name != 'pull_request'
         run: |
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          IMAGE_NAME="${{ steps.image_name.outputs.IMAGE_NAME }}"
+          docker push ${{ env.REGISTRY }}/${IMAGE_NAME}:${{ github.sha }}
           # Tag as latest if on main
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            docker tag ${{ env.REGISTRY }}/${IMAGE_NAME}:${{ github.sha }} ${{ env.REGISTRY }}/${IMAGE_NAME}:latest
+            docker push ${{ env.REGISTRY }}/${IMAGE_NAME}:latest
           fi
