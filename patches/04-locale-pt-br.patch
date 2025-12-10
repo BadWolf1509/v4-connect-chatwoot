@@ -1,0 +1,62 @@
+diff --git a/config/locales/pt_BR_super_admin.yml b/config/locales/pt_BR_super_admin.yml
+new file mode 100644
+index 0000000..1234567
+--- /dev/null
++++ b/config/locales/pt_BR_super_admin.yml
+@@ -0,0 +1,56 @@
++pt_BR:
++  # Super Admin translations - V4 Connect
++  super_admin:
++    title: "Console Super Admin"
++    resources:
++      account:
++        one: Conta
++        other: Contas
++      user:
++        one: Usuário
++        other: Usuários
++      platform_app:
++        one: App da Plataforma
++        other: Apps da Plataforma
++      agent_bot:
++        one: Bot Agente
++        other: Bots Agentes
++
++  # Administrate gem translations
++  administrate:
++    actions:
++      show_resource: "Visualizar %{name}"
++      destroy: "Excluir"
++      confirm: "Tem certeza?"
++      edit: "Editar"
++      new_resource: "Novo %{name}"
++      back: "Voltar"
++    search:
++      label: "Pesquisar %{resource}"
++      clear: "Limpar pesquisa"
++    controller:
++      create:
++        success: "%{resource} foi criado com sucesso."
++      update:
++        success: "%{resource} foi atualizado com sucesso."
++      destroy:
++        success: "%{resource} foi excluído com sucesso."
++    fields:
++      has_many:
++        more: "e mais %{count}"
++    pagination:
++      first: "&laquo; Primeira"
++      last: "Última &raquo;"
++      previous: "&lsaquo; Anterior"
++      next: "Próxima &rsaquo;"
++      truncate: "&hellip;"
++
++  # Common interface labels
++  common:
++    save: "Salvar"
++    cancel: "Cancelar"
++    delete: "Excluir"
++    edit: "Editar"
++    back: "Voltar"
++    search: "Pesquisar"
++    loading: "Carregando..."

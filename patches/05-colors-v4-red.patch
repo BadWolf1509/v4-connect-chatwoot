@@ -1,0 +1,40 @@
+diff --git a/theme/colors.js b/theme/colors.js
+index 1234567..abcdefg 100644
+--- a/theme/colors.js
++++ b/theme/colors.js
+@@ -1,6 +1,8 @@
+-// Chatwoot default colors (blue palette)
+-import { blue, blueDark } from '@radix-ui/colors';
++// V4 Connect colors (red palette)
++// Paleta vermelha customizada baseada em #e50914
+
++// Mantém imports originais para fallback
++import { blue, blueDark } from '@radix-ui/colors';
+
+ const woot = {
+-  25: blue.blue2,
+-  50: blue.blue3,
+-  75: blue.blue4,
+-  100: blue.blue5,
+-  200: blue.blue7,
+-  300: blue.blue8,
+-  400: blueDark.blue11,
+-  500: blueDark.blue10,
+-  600: blueDark.blue9,
+-  700: blueDark.blue8,
+-  800: blueDark.blue6,
+-  900: blueDark.blue2,
++  // V4 Connect Red Palette
++  25: '#fef2f2',   // lightest
++  50: '#fee2e2',
++  75: '#fecaca',
++  100: '#fca5a5',
++  200: '#f87171',
++  300: '#ef4444',
++  400: '#dc2626',
++  500: '#e50914',  // V4 primary red
++  600: '#c10812',
++  700: '#9a060e',
++  800: '#73050b',
++  900: '#4c0307',  // darkest
+ };
