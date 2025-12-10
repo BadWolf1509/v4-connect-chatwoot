@@ -17,6 +17,7 @@ v4-connect-chatwoot/
 ├── branding/               # Logos e favicons
 ├── patches/                # Patches de código (traduções, etc)
 ├── scripts/
+│   ├── apply_branding.sh  # Aplicar branding no banco
 │   ├── deploy.sh          # Script de deploy na VPS
 │   └── quick-test.sh      # Validação rápida
 ├── docker/                 # Configurações Docker
@@ -133,6 +134,21 @@ O GitHub Actions irá:
 3. Manter a tag `latest` apontando para main
 
 ## Configuração
+
+### Aplicar Branding no Banco
+
+Use o script `apply_branding.sh` para configurar branding após deploy:
+
+```bash
+# Ver SQL sem executar
+./scripts/apply_branding.sh --dry-run
+
+# Aplicar via container Docker
+./scripts/apply_branding.sh --container chatwoot_chatwoot-web
+
+# Customizar nome da instalação
+INSTALLATION_NAME="Minha Empresa" ./scripts/apply_branding.sh --container chatwoot_chatwoot-web
+```
 
 ### Variáveis de Ambiente
 
