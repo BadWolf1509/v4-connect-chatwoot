@@ -2,10 +2,10 @@ name: Build V4 Connect Image
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
     tags: ['v*']
   pull_request:
-    branches: [main, develop]
+    branches: [main]
   workflow_dispatch:
     inputs:
       chatwoot_version:
@@ -92,5 +92,5 @@ jobs:
             echo "- **Tags:** latest, ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
             echo "- **Pushed to Registry:** Yes" >> $GITHUB_STEP_SUMMARY
           elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
-            echo "- **Pushed to Registry:** No (develop branch - build test only)" >> $GITHUB_STEP_SUMMARY
+            echo "- **Pushed to Registry:** No (PR validation only)" >> $GITHUB_STEP_SUMMARY
           fi
