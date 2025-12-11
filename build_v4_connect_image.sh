@@ -356,7 +356,8 @@ add_installation_name_fallback "app/views/widgets/show.html.erb"
 PORTAL_FOOTER="app/views/public/api/v1/portals/_footer.html.erb"
 if [ -f "$PORTAL_FOOTER" ]; then
   # Substituir @global_config['INSTALLATION_NAME'] por fallback inline
-  sed -i "s|@global_config\['INSTALLATION_NAME'\]|(@global_config['INSTALLATION_NAME'].presence || 'V4 Connect')|g" "$PORTAL_FOOTER"
+  # Usando # como delimitador para evitar conflito com || do Ruby
+  sed -i "s#@global_config\['INSTALLATION_NAME'\]#(@global_config['INSTALLATION_NAME'].presence || 'V4 Connect')#g" "$PORTAL_FOOTER"
   echo "  - Fallback aplicado: $PORTAL_FOOTER"
 fi
 
