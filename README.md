@@ -82,6 +82,37 @@ export IMAGE_TAG=v4-connect/chatwoot:v4.8.0-branded
 ./build_v4_connect_image.sh
 ```
 
+## Desenvolvimento local (hot reload)
+
+Para codar rápido sem rebuild de imagem:
+
+1) Clone o Chatwoot (ou use a pasta `chatwoot-dev`) e copie o branding deste repo:
+```bash
+cp -r ../v4-connect-chatwoot/branding/* public/brand-assets/
+```
+
+2) Crie o `.env` de dev no Chatwoot:
+```bash
+cp .env.example .env
+```
+Defina pelo menos:
+```
+INSTALLATION_NAME=V4 Connect
+POSTGRES_PASSWORD=chatwoot   # ou o que preferir
+REDIS_PASSWORD=chatwoot      # se usar senha
+```
+
+3) Suba o stack de desenvolvimento com hot reload:
+```bash
+docker compose -f docker-compose.yaml -f docker-compose.override.yml up vite rails sidekiq redis postgres mailhog
+```
+
+4) Acesso:
+- Rails: http://localhost:3000
+- Vite HMR: http://localhost:3036/vite-dev/
+
+5) Alterações em arquivos ERB/Vue/JS são refletidas sem rebuild; o bind-mount já leva o código para os containers.
+
 ## Deploy
 
 ### Via GHCR (Recomendado)

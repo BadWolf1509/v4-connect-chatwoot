@@ -189,6 +189,48 @@ if [ -f "$ACCOUNT_FORM" ]; then
   sed -i "s|>Auto Resolve Duration<|>Duração Auto-resolver<|g" "$ACCOUNT_FORM"
 fi
 
+echo "Adicionando validação de erros no controller de contas..."
+ACCOUNTS_CONTROLLER="app/controllers/super_admin/accounts_controller.rb"
+if [ -f "$ACCOUNTS_CONTROLLER" ]; then
+  # Adiciona rescue para ActiveRecord::NotNullViolation após o método create
+  # Procura por "def create" e adiciona tratamento de erro no final do método
+  sed -i '/def create/,/^  end$/ {
+    /^  end$/i\
+  rescue ActiveRecord::NotNullViolation => e\
+    flash.now[:error] = if e.message.include?("name")\
+                          "Nome da conta é obrigatório"\
+                        else\
+                          "Por favor, preencha todos os campos obrigatórios"\
+                        end\
+    render :new, locals: { page: Administrate::Page::Form.new(dashboard, requested_resource) }
+  }' "$ACCOUNTS_CONTROLLER"
+fi
+
+echo "Adicionando validação HTML5 no formulário de contas..."
+# Adiciona script JavaScript para validação client-side
+ACCOUNT_NEW_VIEW="app/views/super_admin/accounts/new.html.erb"
+if [ -f "$ACCOUNT_NEW_VIEW" ]; then
+  # Adiciona validação JavaScript no final do arquivo se ainda não existir
+  if ! grep -q "account-form-validation" "$ACCOUNT_NEW_VIEW"; then
+    cat >> "$ACCOUNT_NEW_VIEW" << 'EOJS'
+<script>
+// account-form-validation
+document.addEventListener('DOMContentLoaded', function() {
+  const accountForm = document.querySelector('form');
+  if (accountForm) {
+    // Adiciona required ao campo name (account_name)
+    const nameInput = accountForm.querySelector('input[name="account[name]"]');
+    if (nameInput) {
+      nameInput.setAttribute('required', 'required');
+      nameInput.setAttribute('placeholder', 'Nome da conta é obrigatório');
+    }
+  }
+});
+</script>
+EOJS
+  fi
+fi
+
 # Formulário de usuários
 USER_FORM="app/views/super_admin/users/_form.html.erb"
 if [ -f "$USER_FORM" ]; then
