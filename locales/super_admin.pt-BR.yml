@@ -1,0 +1,324 @@
+pt_BR:
+  administrate:
+    actions:
+      index: "Listar"
+      show: "Ver"
+      edit: "Editar"
+      destroy: "Excluir"
+      confirm: "Tem certeza?"
+      new_resource: "Novo %{name}"
+      edit_resource: "Editar %{name}"
+      show_resource: "Ver %{name}"
+      back: "Voltar"
+      cancel: "Cancelar"
+      save: "Salvar"
+      update: "Atualizar"
+      create: "Criar"
+    form:
+      error: "erro impediu este registro de ser salvo"
+      errors: "%{count} erros impediram este registro de ser salvo"
+    search:
+      label: "Pesquisar %{resource}"
+      clear: "Limpar pesquisa"
+      placeholder: "Pesquisar..."
+    filter:
+      all: "Todos os registros"
+      clear: "Limpar filtro"
+    pagination:
+      first: "Primeira"
+      last: "Ultima"
+      previous: "Anterior"
+      next: "Proxima"
+      showing: "Exibindo"
+      of: "de"
+      results: "resultados"
+    fields:
+      id: "ID"
+      created_at: "Criado em"
+      updated_at: "Atualizado em"
+      name: "Nome"
+      email: "E-mail"
+      status: "Status"
+      actions: "Acoes"
+      true: "Sim"
+      false: "Nao"
+    resources:
+      account: "Conta"
+      accounts: "Contas"
+      user: "Usuario"
+      users: "Usuarios"
+      inbox: "Caixa de Entrada"
+      inboxes: "Caixas de Entrada"
+      agent_bot: "Bot"
+      agent_bots: "Bots"
+      platform_app: "Aplicativo"
+      platform_apps: "Aplicativos"
+      installation_config: "Configuracao"
+      installation_configs: "Configuracoes"
+      account_user: "Usuario da Conta"
+      account_users: "Usuarios das Contas"
+
+  super_admin:
+    navigation:
+      dashboard: "Painel"
+      accounts: "Contas"
+      users: "Usuarios"
+      super_admins: "Super Admins"
+      access_tokens: "Tokens de Acesso"
+      installation_configs: "Configuracoes"
+      agent_bots: "Bots"
+      platform_apps: "Aplicativos"
+      sidekiq: "Painel Sidekiq"
+      instance_health: "Saude da Instancia"
+      agent_panel: "Painel do Agente"
+      logout: "Sair"
+      settings: "Configuracoes"
+
+    dashboard:
+      title: "Painel Administrativo"
+      admin_dashboard: "Painel do Admin"
+      accounts: "Contas"
+      users: "Usuarios"
+      inboxes: "Caixas de Entrada"
+      conversations: "Conversas"
+      conversations_chart: "Conversas"
+      total: "Total"
+      active: "Ativos"
+      inactive: "Inativos"
+
+    settings:
+      title: "Configuracoes"
+      update_settings: "Atualize as configuracoes da sua instancia"
+      alert: "Alerta!"
+      premium_warning: "Alteracoes premium nao autorizadas podem resultar em bloqueio da conta."
+      installation_identifier: "Identificador da Instalacao"
+      current_plan: "Plano Atual"
+      update: "Atualizar"
+      manage: "Gerenciar"
+      agent_limit_warning: "Voce tem %{count} agentes. Adicione mais licencas para habilitar todos."
+      need_help: "Precisa de ajuda?"
+      having_trouble: "Estamos aqui para ajudar."
+      community_support: "Suporte da Comunidade"
+      chat_support: "Suporte por Chat"
+      features: "Funcionalidades"
+      switch_to_enterprise: "Mudar para Enterprise"
+      upgrade_now: "Atualizar agora"
+
+    instance_status:
+      title: "Status da Instancia"
+      metric: "Metrica"
+      value: "Valor"
+      chatwoot_version: "Versao do V4 Connect"
+      postgres_version: "Versao do PostgreSQL"
+      redis_version: "Versao do Redis"
+      sidekiq_status: "Status do Sidekiq"
+      running: "Rodando"
+      stopped: "Parado"
+
+    accounts:
+      title: "Contas"
+      new_account: "Nova Conta"
+      edit_account: "Editar Conta"
+      show_account: "Ver Conta"
+      account_name: "Nome da Conta"
+      account_status: "Status da Conta"
+      locale: "Idioma"
+      domain: "Dominio"
+      support_email: "E-mail de Suporte"
+      feature_flags: "Funcionalidades"
+      limits: "Limites"
+      reset_cache: "Limpar Cache"
+      reset_cache_warning: "Ira limpar as chaves de cache do frontend. Proxima carga busca do backend."
+      reset_frontend_cache: "Limpar Cache do Frontend"
+      seed_data: "Dados de Exemplo"
+      seed_data_description: "Gerar dados de exemplo para esta conta."
+      seed_data_warning: "Ira limpar todos os dados existentes nesta conta."
+      generate_seed_data: "Gerar Dados de Exemplo"
+      auto_resolve: "Auto-resolver"
+      auto_resolve_duration: "Duracao do auto-resolver"
+
+    users:
+      title: "Usuarios"
+      new_user: "Novo Usuario"
+      edit_user: "Editar Usuario"
+      show_user: "Ver Usuario"
+      user_name: "Nome"
+      user_email: "E-mail"
+      user_type: "Tipo"
+      confirmed: "Confirmado"
+      confirmation_pending: "Confirmacao Pendente"
+      impersonate: "Simular"
+      impersonate_user: "Simular Usuario"
+      impersonate_warning: "Acoes serao registradas como o usuario simulado."
+      custom_attributes: "Atributos Personalizados"
+
+    super_admins:
+      title: "Super Administradores"
+      new_super_admin: "Novo Super Admin"
+      edit_super_admin: "Editar Super Admin"
+
+    access_tokens:
+      title: "Tokens de Acesso"
+      new_token: "Novo Token"
+      token: "Token"
+      owner: "Proprietario"
+      created: "Criado"
+
+    agent_bots:
+      title: "Bots"
+      new_bot: "Novo Bot"
+      edit_bot: "Editar Bot"
+      bot_name: "Nome do Bot"
+      bot_description: "Descricao"
+      outgoing_url: "URL de Saida"
+
+    platform_apps:
+      title: "Aplicativos da Plataforma"
+      new_app: "Novo Aplicativo"
+      edit_app: "Editar Aplicativo"
+      app_name: "Nome do Aplicativo"
+
+    app_configs:
+      title: "Configurar Definicoes"
+      submit: "Enviar"
+      true_value: "Verdadeiro"
+      false_value: "Falso"
+      enabled: "Habilitado"
+      disabled: "Desabilitado"
+
+    login:
+      welcome: "Boas-vindas, admin"
+      email: "E-mail"
+      email_placeholder: "Digite seu e-mail"
+      password: "Senha"
+      password_placeholder: "Digite sua senha"
+      sign_in: "Entrar"
+      forgot_password: "Esqueceu a senha?"
+
+    playground:
+      title: "Playground Robin AI"
+      back: "Voltar"
+      chat_with_source: "Converse com a fonte"
+      evaluate_efficiency: "e avalie sua eficiencia."
+      type_message: "Digite uma mensagem... [CMD/CTRL + Enter para enviar]"
+      error_message: "Erro: Nao foi possivel obter resposta. Verifique o console."
+      send: "Enviar"
+
+    common:
+      edit: "Editar"
+      delete: "Excluir"
+      cancel: "Cancelar"
+      save: "Salvar"
+      submit: "Enviar"
+      back: "Voltar"
+      confirm: "Confirmar"
+      yes: "Sim"
+      no: "Nao"
+      loading: "Carregando..."
+      no_data: "Nenhum dado encontrado"
+      actions: "Acoes"
+      details: "Detalhes"
+      created_at: "Criado em"
+      updated_at: "Atualizado em"
+
+  helpers:
+    label:
+      account:
+        name: "Nome"
+        locale: "Idioma"
+        domain: "Dominio"
+        support_email: "E-mail de Suporte"
+        auto_resolve_duration: "Duracao do Auto-resolver"
+        limits: "Limites"
+        status: "Status"
+        users: "Usuarios"
+        conversations: "Conversas"
+      user:
+        name: "Nome"
+        display_name: "Nome de Exibicao"
+        email: "E-mail"
+        password: "Senha"
+        password_confirmation: "Confirmacao de Senha"
+        type: "Tipo"
+        custom_attributes: "Atributos Personalizados"
+      account_user:
+        role: "Funcao"
+        availability: "Disponibilidade"
+        auto_offline: "Auto Offline"
+      super_admin:
+        email: "E-mail"
+        password: "Senha"
+        password_confirmation: "Confirmacao de Senha"
+      access_token:
+        owner_type: "Tipo do Proprietario"
+        owner_id: "ID do Proprietario"
+        token: "Token"
+      agent_bot:
+        name: "Nome"
+        description: "Descricao"
+        outgoing_url: "URL de Saida"
+        bot_type: "Tipo do Bot"
+        bot_config: "Configuracao do Bot"
+      platform_app:
+        name: "Nome"
+      installation_config:
+        name: "Nome"
+        value: "Valor"
+        locked: "Bloqueado"
+
+  date:
+    formats:
+      default: "%d/%m/%Y"
+      short: "%d/%m"
+      long: "%d de %B de %Y"
+  time:
+    formats:
+      default: "%d/%m/%Y %H:%M"
+      short: "%d/%m %H:%M"
+      long: "%d de %B de %Y as %H:%M"
+
+  activerecord:
+    models:
+      account:
+        one: "Conta"
+        other: "Contas"
+      user:
+        one: "Usuario"
+        other: "Usuarios"
+      super_admin:
+        one: "Super Admin"
+        other: "Super Admins"
+      access_token:
+        one: "Token de Acesso"
+        other: "Tokens de Acesso"
+      agent_bot:
+        one: "Bot"
+        other: "Bots"
+      platform_app:
+        one: "Aplicativo"
+        other: "Aplicativos"
+      installation_config:
+        one: "Configuracao"
+        other: "Configuracoes"
+    attributes:
+      account:
+        name: "Nome"
+        locale: "Idioma"
+        domain: "Dominio"
+        support_email: "E-mail de Suporte"
+        status: "Status"
+        users: "Usuarios"
+        conversations: "Conversas"
+      user:
+        name: "Nome"
+        email: "E-mail"
+        password: "Senha"
+        type: "Tipo"
+      access_token:
+        token: "Token"
+        owner: "Proprietario"
+      platform_app:
+        name: "Nome"
+      agent_bot:
+        name: "Nome"
+        description: "Descricao"

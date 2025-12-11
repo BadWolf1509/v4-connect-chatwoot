@@ -1,0 +1,20 @@
+diff --git a/app/controllers/super_admin/accounts_controller.rb b/app/controllers/super_admin/accounts_controller.rb
+index 1234567..abcdefg 100644
+--- a/app/controllers/super_admin/accounts_controller.rb
++++ b/app/controllers/super_admin/accounts_controller.rb
+@@ -10,6 +10,13 @@ class SuperAdmin::AccountsController < SuperAdmin::ApplicationController
+     if requested_resource.save
+       redirect_to(resource_path)
+     else
++      # Better error handling for validation errors
++      flash.now[:error] = if requested_resource.errors[:name].any?
++                            'Nome da conta é obrigatório'
++                          else
++                            requested_resource.errors.full_messages.join(', ')
++                          end
+       render :new, locals: { page: Administrate::Page::Form.new(dashboard, requested_resource) }
+     end
++  rescue ActiveRecord::NotNullViolation => e
++    flash.now[:error] = 'Por favor, preencha todos os campos obrigatórios'
++    render :new, locals: { page: Administrate::Page::Form.new(dashboard, requested_resource) }
+   end

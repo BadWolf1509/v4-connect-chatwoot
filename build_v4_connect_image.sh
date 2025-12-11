@@ -146,54 +146,155 @@ if [ -f "$IMPERSONATE" ]; then
   sed -i "s|Any actions executed after impersonate will appear as actions performed by the impersonated user|Quaisquer ações executadas após simular aparecerão como ações realizadas pelo usuário simulado|g" "$IMPERSONATE"
 fi
 
-# Tradução dos nomes de recursos do Administrate
-# Criando arquivo de locale para super_admin
-cat >> config/locales/pt_BR.yml << 'LOCALE_EOF'
+# Copiando arquivo de locale completo para super_admin
+echo "Copiando arquivo de locale PT-BR completo para super_admin..."
+cp "${BUILD_ROOT}/locales/super_admin.pt-BR.yml" config/locales/super_admin.pt-BR.yml
 
-  # Super Admin translations
-  super_admin:
-    resources:
-      account:
-        one: Conta
-        other: Contas
-      user:
-        one: Usuário
-        other: Usuários
-      platform_app:
-        one: App da Plataforma
-        other: Apps da Plataforma
-      agent_bot:
-        one: Bot Agente
-        other: Bots Agentes
+# Dashboard principal (index.html.erb)
+DASHBOARD_FILE="app/views/super_admin/dashboard/index.html.erb"
+if [ -f "$DASHBOARD_FILE" ]; then
+  sed -i "s|Admin Dashboard|Painel Administrativo|g" "$DASHBOARD_FILE"
+  sed -i "s|>Accounts<|>Contas<|g" "$DASHBOARD_FILE"
+  sed -i "s|>Users<|>Usuários<|g" "$DASHBOARD_FILE"
+  sed -i "s|>Inboxes<|>Caixas de Entrada<|g" "$DASHBOARD_FILE"
+  sed -i "s|>Conversations<|>Conversas<|g" "$DASHBOARD_FILE"
+  sed -i "s|>Total<|>Total<|g" "$DASHBOARD_FILE"
+  sed -i "s|>Active<|>Ativos<|g" "$DASHBOARD_FILE"
+fi
 
-  administrate:
-    actions:
-      show_resource: "Visualizar %{name}"
-      destroy: "Excluir"
-      confirm: "Tem certeza?"
-      edit: "Editar"
-      new_resource: "Novo %{name}"
-      back: "Voltar"
-    search:
-      label: "Pesquisar %{resource}"
-      clear: "Limpar pesquisa"
-    controller:
-      create:
-        success: "%{resource} foi criado com sucesso."
-      update:
-        success: "%{resource} foi atualizado com sucesso."
-      destroy:
-        success: "%{resource} foi excluído com sucesso."
-    fields:
-      has_many:
-        more: "e mais %{count}"
-    pagination:
-      first: "&laquo; Primeira"
-      last: "Última &raquo;"
-      previous: "&lsaquo; Anterior"
-      next: "Próxima &rsaquo;"
-      truncate: "&hellip;"
-LOCALE_EOF
+# Instance Status page
+INSTANCE_STATUS="app/views/super_admin/instance_status/show.html.erb"
+if [ -f "$INSTANCE_STATUS" ]; then
+  sed -i "s|Instance Status|Status da Instância|g" "$INSTANCE_STATUS"
+  sed -i "s|>Metric<|>Métrica<|g" "$INSTANCE_STATUS"
+  sed -i "s|>Value<|>Valor<|g" "$INSTANCE_STATUS"
+  sed -i "s|Chatwoot Version|Versão do V4 Connect|g" "$INSTANCE_STATUS"
+  sed -i "s|Postgres Version|Versão do PostgreSQL|g" "$INSTANCE_STATUS"
+  sed -i "s|Redis Version|Versão do Redis|g" "$INSTANCE_STATUS"
+  sed -i "s|Sidekiq Status|Status do Sidekiq|g" "$INSTANCE_STATUS"
+  sed -i "s|>Running<|>Rodando<|g" "$INSTANCE_STATUS"
+  sed -i "s|>Stopped<|>Parado<|g" "$INSTANCE_STATUS"
+fi
+
+# Formulário de contas
+ACCOUNT_FORM="app/views/super_admin/accounts/_form.html.erb"
+if [ -f "$ACCOUNT_FORM" ]; then
+  sed -i "s|>Name<|>Nome<|g" "$ACCOUNT_FORM"
+  sed -i "s|>Status<|>Status<|g" "$ACCOUNT_FORM"
+  sed -i "s|>Locale<|>Idioma<|g" "$ACCOUNT_FORM"
+  sed -i "s|>Domain<|>Domínio<|g" "$ACCOUNT_FORM"
+  sed -i "s|>Support Email<|>E-mail de Suporte<|g" "$ACCOUNT_FORM"
+  sed -i "s|>Feature Flags<|>Funcionalidades<|g" "$ACCOUNT_FORM"
+  sed -i "s|>Limits<|>Limites<|g" "$ACCOUNT_FORM"
+  sed -i "s|>Auto Resolve Duration<|>Duração Auto-resolver<|g" "$ACCOUNT_FORM"
+fi
+
+echo "Adicionando validação de erros no controller de contas..."
+ACCOUNTS_CONTROLLER="app/controllers/super_admin/accounts_controller.rb"
+if [ -f "$ACCOUNTS_CONTROLLER" ]; then
+  # Adiciona rescue para ActiveRecord::NotNullViolation após o método create
+  # Procura por "def create" e adiciona tratamento de erro no final do método
+  sed -i '/def create/,/^  end$/ {
+    /^  end$/i\
+  rescue ActiveRecord::NotNullViolation => e\
+    flash.now[:error] = if e.message.include?("name")\
+                          "Nome da conta é obrigatório"\
+                        else\
+                          "Por favor, preencha todos os campos obrigatórios"\
+                        end\
+    render :new, locals: { page: Administrate::Page::Form.new(dashboard, requested_resource) }
+  }' "$ACCOUNTS_CONTROLLER"
+fi
+
+echo "Adicionando validação HTML5 no formulário de contas..."
+# Adiciona script JavaScript para validação client-side
+ACCOUNT_NEW_VIEW="app/views/super_admin/accounts/new.html.erb"
+if [ -f "$ACCOUNT_NEW_VIEW" ]; then
+  # Adiciona validação JavaScript no final do arquivo se ainda não existir
+  if ! grep -q "account-form-validation" "$ACCOUNT_NEW_VIEW"; then
+    cat >> "$ACCOUNT_NEW_VIEW" << 'EOJS'
+<script>
+// account-form-validation
+document.addEventListener('DOMContentLoaded', function() {
+  const accountForm = document.querySelector('form');
+  if (accountForm) {
+    // Adiciona required ao campo name (account_name)
+    const nameInput = accountForm.querySelector('input[name="account[name]"]');
+    if (nameInput) {
+      nameInput.setAttribute('required', 'required');
+      nameInput.setAttribute('placeholder', 'Nome da conta é obrigatório');
+    }
+  }
+});
+</script>
+EOJS
+  fi
+fi
+
+# Formulário de usuários
+USER_FORM="app/views/super_admin/users/_form.html.erb"
+if [ -f "$USER_FORM" ]; then
+  sed -i "s|>Name<|>Nome<|g" "$USER_FORM"
+  sed -i "s|>Display Name<|>Nome de Exibição<|g" "$USER_FORM"
+  sed -i "s|>Email<|>E-mail<|g" "$USER_FORM"
+  sed -i "s|>Password<|>Senha<|g" "$USER_FORM"
+  sed -i "s|>Password Confirmation<|>Confirmação de Senha<|g" "$USER_FORM"
+  sed -i "s|>Type<|>Tipo<|g" "$USER_FORM"
+  sed -i "s|>Custom Attributes<|>Atributos Personalizados<|g" "$USER_FORM"
+fi
+
+# Botões e ações comuns (layout application.html.erb)
+APP_LAYOUT="app/views/layouts/super_admin/application.html.erb"
+if [ -f "$APP_LAYOUT" ]; then
+  sed -i "s|>Edit<|>Editar<|g" "$APP_LAYOUT"
+  sed -i "s|>Delete<|>Excluir<|g" "$APP_LAYOUT"
+  sed -i "s|>Save<|>Salvar<|g" "$APP_LAYOUT"
+  sed -i "s|>Cancel<|>Cancelar<|g" "$APP_LAYOUT"
+  sed -i "s|>Back<|>Voltar<|g" "$APP_LAYOUT"
+fi
+
+# Tradução do Vue Dashboard Component
+DASHBOARD_VUE="app/javascript/dashboard/components/widgets/chart/index.vue"
+if [ -f "$DASHBOARD_VUE" ]; then
+  sed -i "s/'Accounts'/'Contas'/g" "$DASHBOARD_VUE"
+  sed -i "s/'Users'/'Usuários'/g" "$DASHBOARD_VUE"
+  sed -i "s/'Inboxes'/'Caixas de Entrada'/g" "$DASHBOARD_VUE"
+  sed -i "s/'Conversations'/'Conversas'/g" "$DASHBOARD_VUE"
+fi
+
+# Tradução do Playground Robin AI
+PLAYGROUND_VUE="app/javascript/super_admin/playground/index.vue"
+if [ -f "$PLAYGROUND_VUE" ]; then
+  sed -i "s|Robin AI playground|Playground Robin AI|g" "$PLAYGROUND_VUE"
+  sed -i "s|Chat with the source|Converse com a fonte|g" "$PLAYGROUND_VUE"
+  sed -i "s|evaluate its efficiency|avalie sua eficiência|g" "$PLAYGROUND_VUE"
+  sed -i "s|Type a message|Digite uma mensagem|g" "$PLAYGROUND_VUE"
+  sed -i "s|Error: Could not get response|Erro: Não foi possível obter resposta|g" "$PLAYGROUND_VUE"
+  sed -i "s|Please check the console for more details|Por favor, verifique o console para mais detalhes|g" "$PLAYGROUND_VUE"
+fi
+
+# Tradução dos filtros do Administrate
+find app/views/super_admin -name "*.erb" -exec sed -i 's|All records|Todos os registros|g' {} \; 2>/dev/null || true
+find app/views/super_admin -name "*.erb" -exec sed -i 's|Clear filter|Limpar filtro|g' {} \; 2>/dev/null || true
+find app/views/super_admin -name "*.erb" -exec sed -i 's|Search|Pesquisar|g' {} \; 2>/dev/null || true
+find app/views/super_admin -name "*.erb" -exec sed -i 's|Showing|Exibindo|g' {} \; 2>/dev/null || true
+find app/views/super_admin -name "*.erb" -exec sed -i 's| of | de |g' {} \; 2>/dev/null || true
+find app/views/super_admin -name "*.erb" -exec sed -i 's|results|resultados|g' {} \; 2>/dev/null || true
+
+# Tradução das ações do Administrate
+find app/views/super_admin -name "*.erb" -exec sed -i 's|>New |>Novo |g' {} \; 2>/dev/null || true
+find app/views/super_admin -name "*.erb" -exec sed -i 's|>Show<|>Ver<|g' {} \; 2>/dev/null || true
+find app/views/super_admin -name "*.erb" -exec sed -i 's|>Edit<|>Editar<|g' {} \; 2>/dev/null || true
+find app/views/super_admin -name "*.erb" -exec sed -i 's|>Destroy<|>Excluir<|g' {} \; 2>/dev/null || true
+find app/views/super_admin -name "*.erb" -exec sed -i 's|>Delete<|>Excluir<|g' {} \; 2>/dev/null || true
+find app/views/super_admin -name "*.erb" -exec sed -i 's|Are you sure?|Tem certeza?|g' {} \; 2>/dev/null || true
+
+# Tradução de campos comuns
+find app/views/super_admin -name "*.erb" -exec sed -i 's|Created At|Criado em|g' {} \; 2>/dev/null || true
+find app/views/super_admin -name "*.erb" -exec sed -i 's|Updated At|Atualizado em|g' {} \; 2>/dev/null || true
+find app/views/super_admin -name "*.erb" -exec sed -i 's|>Actions<|>Ações<|g' {} \; 2>/dev/null || true
+find app/views/super_admin -name "*.erb" -exec sed -i 's|>True<|>Sim<|g' {} \; 2>/dev/null || true
+find app/views/super_admin -name "*.erb" -exec sed -i 's|>False<|>Não<|g' {} \; 2>/dev/null || true
 
 echo "Corrigindo Dockerfile (git SHA workaround)..."
 # Move git SHA capture before asset cleanup to avoid /bin/sh issues
@@ -204,6 +305,19 @@ sed -i '/^RUN git rev-parse HEAD > \/app\/.git_sha$/d' docker/Dockerfile
 echo "Copiando brand-assets (logos/favicons)..."
 mkdir -p "${WORKDIR}/public/brand-assets"
 cp -r "${BUILD_ROOT}/branding/." "${WORKDIR}/public/brand-assets/"
+
+echo "Aplicando patches adicionais..."
+# Patch de traduções PT-BR do frontend (Assignment Policy, sidebar, etc)
+if [ -f "${BUILD_ROOT}/patches/05-frontend-translations-pt-br.patch" ]; then
+  echo "  - Aplicando traduções PT-BR do frontend..."
+  git apply "${BUILD_ROOT}/patches/05-frontend-translations-pt-br.patch" || echo "    (patch já aplicado ou conflito)"
+fi
+
+# Patch de configuração de locale
+if [ -f "${BUILD_ROOT}/patches/07-config-locale.patch" ]; then
+  echo "  - Aplicando configuração de locale..."
+  git apply "${BUILD_ROOT}/patches/07-config-locale.patch" || echo "    (patch já aplicado ou conflito)"
+fi
 
 echo "Construindo imagem ${IMAGE_TAG} (sem cache)..."
 docker build \
@@ -221,6 +335,8 @@ Imagem pronta com customizacoes V4 Connect:
 - Super Admin Console em PT-BR
 - Onboarding em PT-BR
 - Login Super Admin em PT-BR
+- Atribuição de Agentes em PT-BR
+- Sidebar Settings em PT-BR
 - Brand assets customizados
 ============================================================
 EOF

@@ -1,0 +1,68 @@
+diff --git a/tailwind.config.js b/tailwind.config.js
+index 82a6c2c..a7fd754 100644
+--- a/tailwind.config.js
++++ b/tailwind.config.js
+@@ -7,7 +7,10 @@ const {
+   getIconCollections,
+ } = require('@egoist/tailwindcss-icons');
+ 
++// V4 Company Typography
+ const defaultSansFonts = [
++  'Montserrat',      // V4 Primary Font
++  '"Proxima Nova"',  // V4 Alternative Font
+   '-apple-system',
+   'system-ui',
+   'BlinkMacSystemFont',
+@@ -41,6 +44,8 @@ const tailwindConfig = {
+         sans: defaultSansFonts,
+         inter: ['Inter', ...defaultSansFonts],
+         interDisplay: ['Inter Display', ...defaultSansFonts],
++        bebasNeue: ['"Bebas Neue"', 'Impact', 'sans-serif'],  // V4 Display Font
++        morganite: ['Morganite', '"Bebas Neue"', 'Impact', 'sans-serif'],  // V4 Display Font
+       },
+       typography: {
+         bubble: {
+diff --git a/theme/colors.js b/theme/colors.js
+index 52870e7..3a5223b 100644
+--- a/theme/colors.js
++++ b/theme/colors.js
+@@ -15,18 +15,18 @@ const {
+ 
+ export const colors = {
+   woot: {
+-    25: blue.blue2,
+-    50: blue.blue3,
+-    75: blue.blue4,
+-    100: blue.blue5,
+-    200: blue.blue7,
+-    300: blue.blue8,
+-    400: blueDark.blue11,
+-    500: blueDark.blue10,
+-    600: blueDark.blue9,
+-    700: blueDark.blue8,
+-    800: blueDark.blue6,
+-    900: blueDark.blue2,
++    25: '#fef2f2',   // V4 lightest red
++    50: '#fee2e2',   // V4 light red
++    75: '#fecaca',
++    100: '#fca5a5',
++    200: '#f87171',
++    300: '#ef4444',
++    400: '#dc2626',
++    500: '#e50914',  // V4 Primary Red
++    600: '#b20710',  // V4 Dark Red
++    700: '#80050b',  // V4 Darker Red
++    800: '#5c0308',
++    900: '#400306',  // V4 Darkest Red
+   },
+   green: {
+     50: greenDark.green12,
+@@ -211,7 +211,7 @@ export const colors = {
+     },
+ 
+     black: '#000000',
+-    brand: '#2781F6',
++    brand: '#e50914',  // V4 Primary Red
+     background: 'rgb(var(--background-color) / <alpha-value>)',
+     solid: {
+       1: 'rgb(var(--solid-1) / <alpha-value>)',

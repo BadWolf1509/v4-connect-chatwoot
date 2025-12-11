@@ -7,6 +7,13 @@
 .env.local
 .env.*.local
 
+# Scripts with credentials (never commit!)
+scripts/apply_super_admin.sh
+scripts/apply_super_admin.rb
+scripts/apply_branding_config.rb
+*_credentials.rb
+*_secrets.*
+
 # IDE
 .idea/
 .vscode/
@@ -19,3 +26,4 @@ Thumbs.db
 
 # Docker
 docker-compose.override.yml
+.claude/
