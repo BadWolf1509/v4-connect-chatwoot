@@ -306,17 +306,43 @@ echo "Copiando brand-assets (logos/favicons)..."
 mkdir -p "${WORKDIR}/public/brand-assets"
 cp -r "${BUILD_ROOT}/branding/." "${WORKDIR}/public/brand-assets/"
 
-echo "Aplicando patches adicionais..."
-# Patch de traduções PT-BR do frontend (Assignment Policy, sidebar, etc)
-if [ -f "${BUILD_ROOT}/patches/05-frontend-translations-pt-br.patch" ]; then
-  echo "  - Aplicando traduções PT-BR do frontend..."
-  git apply "${BUILD_ROOT}/patches/05-frontend-translations-pt-br.patch" || echo "    (patch já aplicado ou conflito)"
+echo "Aplicando traduções PT-BR do frontend (Assignment Policy, Sidebar)..."
+node "${BUILD_ROOT}/scripts/apply_frontend_translations.js" \
+  "app/javascript/dashboard/i18n/locale/pt_BR/settings.json" \
+  "${BUILD_ROOT}/locales/assignment_policy.pt-BR.json"
+
+echo "Traduzindo Super Admin Dashboard Vue..."
+SUPERADMIN_DASHBOARD="app/javascript/superadmin_pages/views/dashboard/Index.vue"
+if [ -f "$SUPERADMIN_DASHBOARD" ]; then
+  sed -i "s|'Admin Dashboard'|'Painel Administrativo'|g" "$SUPERADMIN_DASHBOARD"
+  sed -i "s|{{ 'Admin Dashboard' }}|{{ 'Painel Administrativo' }}|g" "$SUPERADMIN_DASHBOARD"
+  sed -i "s|{{ 'Accounts' }}|{{ 'Contas' }}|g" "$SUPERADMIN_DASHBOARD"
+  sed -i "s|{{ 'Users' }}|{{ 'Usuarios' }}|g" "$SUPERADMIN_DASHBOARD"
+  sed -i "s|{{ 'Inboxes' }}|{{ 'Caixas de entrada' }}|g" "$SUPERADMIN_DASHBOARD"
+  sed -i "s|{{ 'Conversations' }}|{{ 'Conversas' }}|g" "$SUPERADMIN_DASHBOARD"
+  sed -i "s|label: 'Conversations'|label: 'Conversas'|g" "$SUPERADMIN_DASHBOARD"
 fi
 
-# Patch de configuração de locale
-if [ -f "${BUILD_ROOT}/patches/07-config-locale.patch" ]; then
-  echo "  - Aplicando configuração de locale..."
-  git apply "${BUILD_ROOT}/patches/07-config-locale.patch" || echo "    (patch já aplicado ou conflito)"
+echo "Configurando fallback para INSTALLATION_NAME no vueapp..."
+VUEAPP_LAYOUT="app/views/layouts/vueapp.html.erb"
+if [ -f "$VUEAPP_LAYOUT" ]; then
+  # Adicionar variável installation_name no início do head
+  sed -i '/<head>/a\    <% installation_name = @global_config['\''INSTALLATION_NAME'\''].presence || ENV['\''INSTALLATION_NAME'\''].presence || '\''V4 Connect'\'' %>' "$VUEAPP_LAYOUT"
+  # Substituir referências diretas por installation_name
+  sed -i "s|<%= @global_config\['INSTALLATION_NAME'\] %>|<%= installation_name %>|g" "$VUEAPP_LAYOUT"
+  # Atualizar favicons para usar brand-assets
+  sed -i 's|href="/favicon-|href="/brand-assets/favicon-|g' "$VUEAPP_LAYOUT"
+  sed -i 's|href="/apple-icon-|href="/brand-assets/apple-touch-icon.png" /><!-- |g' "$VUEAPP_LAYOUT"
+  sed -i 's|href="/android-icon-|href="/brand-assets/android-chrome-|g' "$VUEAPP_LAYOUT"
+fi
+
+echo "Configurando locale padrão PT-BR..."
+APP_CONFIG="config/application.rb"
+if [ -f "$APP_CONFIG" ]; then
+  # Adicionar configuração de locale se não existir
+  if ! grep -q "config.i18n.default_locale" "$APP_CONFIG"; then
+    sed -i "/config.generators.stylesheets = false/a\\\\n    # Locale padrão\\n    config.i18n.default_locale = (ENV['DEFAULT_LOCALE'] || 'pt_BR').to_sym" "$APP_CONFIG"
+  fi
 fi
 
 echo "Construindo imagem ${IMAGE_TAG} (sem cache)..."
