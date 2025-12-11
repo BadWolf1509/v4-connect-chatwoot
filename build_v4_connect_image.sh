@@ -306,6 +306,19 @@ echo "Copiando brand-assets (logos/favicons)..."
 mkdir -p "${WORKDIR}/public/brand-assets"
 cp -r "${BUILD_ROOT}/branding/." "${WORKDIR}/public/brand-assets/"
 
+echo "Aplicando patches adicionais..."
+# Patch de traduções PT-BR do frontend (Assignment Policy, sidebar, etc)
+if [ -f "${BUILD_ROOT}/patches/05-frontend-translations-pt-br.patch" ]; then
+  echo "  - Aplicando traduções PT-BR do frontend..."
+  git apply "${BUILD_ROOT}/patches/05-frontend-translations-pt-br.patch" || echo "    (patch já aplicado ou conflito)"
+fi
+
+# Patch de configuração de locale
+if [ -f "${BUILD_ROOT}/patches/07-config-locale.patch" ]; then
+  echo "  - Aplicando configuração de locale..."
+  git apply "${BUILD_ROOT}/patches/07-config-locale.patch" || echo "    (patch já aplicado ou conflito)"
+fi
+
 echo "Construindo imagem ${IMAGE_TAG} (sem cache)..."
 docker build \
   --no-cache \
@@ -322,6 +335,8 @@ Imagem pronta com customizacoes V4 Connect:
 - Super Admin Console em PT-BR
 - Onboarding em PT-BR
 - Login Super Admin em PT-BR
+- Atribuição de Agentes em PT-BR
+- Sidebar Settings em PT-BR
 - Brand assets customizados
 ============================================================
 EOF

@@ -1,8 +1,4 @@
-# Traduções PT-BR para Super Admin - V4 Connect
-# Este arquivo contém todas as traduções necessárias para o módulo super_admin
-
-pt-BR:
-  # Administrate Framework
+pt_BR:
   administrate:
     actions:
       index: "Listar"
@@ -19,9 +15,8 @@ pt-BR:
       update: "Atualizar"
       create: "Criar"
     form:
-      errors:
-        one: "1 erro impediu que %{resource_name} fosse salvo"
-        other: "%{count} erros impediram que %{resource_name} fosse salvo"
+      error: "erro impediu este registro de ser salvo"
+      errors: "%{count} erros impediram este registro de ser salvo"
     search:
       label: "Pesquisar %{resource}"
       clear: "Limpar pesquisa"
@@ -31,9 +26,9 @@ pt-BR:
       clear: "Limpar filtro"
     pagination:
       first: "Primeira"
-      last: "Última"
+      last: "Ultima"
       previous: "Anterior"
-      next: "Próxima"
+      next: "Proxima"
       showing: "Exibindo"
       of: "de"
       results: "resultados"
@@ -44,32 +39,46 @@ pt-BR:
       name: "Nome"
       email: "E-mail"
       status: "Status"
-      actions: "Ações"
+      actions: "Acoes"
       true: "Sim"
-      false: "Não"
+      false: "Nao"
     resources:
       account: "Conta"
       accounts: "Contas"
-      user: "Usuário"
-      users: "Usuários"
+      user: "Usuario"
+      users: "Usuarios"
       inbox: "Caixa de Entrada"
       inboxes: "Caixas de Entrada"
       agent_bot: "Bot"
       agent_bots: "Bots"
       platform_app: "Aplicativo"
       platform_apps: "Aplicativos"
-      installation_config: "Configuração"
-      installation_configs: "Configurações"
-      account_user: "Usuário da Conta"
-      account_users: "Usuários das Contas"
+      installation_config: "Configuracao"
+      installation_configs: "Configuracoes"
+      account_user: "Usuario da Conta"
+      account_users: "Usuarios das Contas"
 
-  # Super Admin Dashboard
   super_admin:
+    navigation:
+      dashboard: "Painel"
+      accounts: "Contas"
+      users: "Usuarios"
+      super_admins: "Super Admins"
+      access_tokens: "Tokens de Acesso"
+      installation_configs: "Configuracoes"
+      agent_bots: "Bots"
+      platform_apps: "Aplicativos"
+      sidekiq: "Painel Sidekiq"
+      instance_health: "Saude da Instancia"
+      agent_panel: "Painel do Agente"
+      logout: "Sair"
+      settings: "Configuracoes"
+
     dashboard:
       title: "Painel Administrativo"
       admin_dashboard: "Painel do Admin"
       accounts: "Contas"
-      users: "Usuários"
+      users: "Usuarios"
       inboxes: "Caixas de Entrada"
       conversations: "Conversas"
       conversations_chart: "Conversas"
@@ -77,54 +86,35 @@ pt-BR:
       active: "Ativos"
       inactive: "Inativos"
 
-    # Navigation
-    navigation:
-      dashboard: "Painel"
-      accounts: "Contas"
-      users: "Usuários"
-      super_admins: "Super Admins"
-      access_tokens: "Tokens de Acesso"
-      installation_configs: "Configurações"
-      agent_bots: "Bots"
-      platform_apps: "Aplicativos"
-      sidekiq: "Painel Sidekiq"
-      instance_health: "Saúde da Instância"
-      agent_panel: "Painel do Agente"
-      logout: "Sair"
-      settings: "Configurações"
-
-    # Settings Page
     settings:
-      title: "Configurações"
-      update_settings: "Atualize as configurações da sua instância V4 Connect abaixo"
+      title: "Configuracoes"
+      update_settings: "Atualize as configuracoes da sua instancia"
       alert: "Alerta!"
-      premium_warning: "Alterações premium não autorizadas podem resultar em bloqueio da conta. Por favor, entre em contato com o suporte para desbloquear."
-      installation_identifier: "Identificador da Instalação"
+      premium_warning: "Alteracoes premium nao autorizadas podem resultar em bloqueio da conta."
+      installation_identifier: "Identificador da Instalacao"
       current_plan: "Plano Atual"
       update: "Atualizar"
       manage: "Gerenciar"
-      agent_limit_warning: "Você tem %{count} agentes. Por favor, adicione mais licenças de agente para habilitar acesso para todos os agentes."
+      agent_limit_warning: "Voce tem %{count} agentes. Adicione mais licencas para habilitar todos."
       need_help: "Precisa de ajuda?"
-      having_trouble: "Está com algum problema? Converse conosco para obter mais informações."
+      having_trouble: "Estamos aqui para ajudar."
       community_support: "Suporte da Comunidade"
       chat_support: "Suporte por Chat"
       features: "Funcionalidades"
-      switch_to_enterprise: "Mudar para edição Enterprise"
+      switch_to_enterprise: "Mudar para Enterprise"
       upgrade_now: "Atualizar agora"
 
-    # Instance Status
     instance_status:
-      title: "Status da Instância"
-      metric: "Métrica"
+      title: "Status da Instancia"
+      metric: "Metrica"
       value: "Valor"
-      chatwoot_version: "Versão do V4 Connect"
-      postgres_version: "Versão do PostgreSQL"
-      redis_version: "Versão do Redis"
+      chatwoot_version: "Versao do V4 Connect"
+      postgres_version: "Versao do PostgreSQL"
+      redis_version: "Versao do Redis"
       sidekiq_status: "Status do Sidekiq"
       running: "Rodando"
       stopped: "Parado"
 
-    # Accounts
     accounts:
       title: "Contas"
       new_account: "Nova Conta"
@@ -133,76 +123,69 @@ pt-BR:
       account_name: "Nome da Conta"
       account_status: "Status da Conta"
       locale: "Idioma"
-      domain: "Domínio"
+      domain: "Dominio"
       support_email: "E-mail de Suporte"
       feature_flags: "Funcionalidades"
       limits: "Limites"
       reset_cache: "Limpar Cache"
-      reset_cache_warning: "Isso irá limpar as chaves de cache no frontend. O próximo carregamento irá buscar os dados do backend."
+      reset_cache_warning: "Ira limpar as chaves de cache do frontend. Proxima carga busca do backend."
       reset_frontend_cache: "Limpar Cache do Frontend"
       seed_data: "Dados de Exemplo"
-      seed_data_description: "Clique no botão para gerar dados de exemplo para esta conta."
-      seed_data_warning: "Nota: Isso irá limpar todos os dados existentes nesta conta. Não pode ser desfeito."
+      seed_data_description: "Gerar dados de exemplo para esta conta."
+      seed_data_warning: "Ira limpar todos os dados existentes nesta conta."
       generate_seed_data: "Gerar Dados de Exemplo"
       auto_resolve: "Auto-resolver"
-      auto_resolve_duration: "Duração do auto-resolver"
+      auto_resolve_duration: "Duracao do auto-resolver"
 
-    # Users
     users:
-      title: "Usuários"
-      new_user: "Novo Usuário"
-      edit_user: "Editar Usuário"
-      show_user: "Ver Usuário"
+      title: "Usuarios"
+      new_user: "Novo Usuario"
+      edit_user: "Editar Usuario"
+      show_user: "Ver Usuario"
       user_name: "Nome"
       user_email: "E-mail"
       user_type: "Tipo"
       confirmed: "Confirmado"
-      confirmation_pending: "Confirmação Pendente"
+      confirmation_pending: "Confirmacao Pendente"
       impersonate: "Simular"
-      impersonate_user: "Simular Usuário"
-      impersonate_warning: "Cuidado: Qualquer ação executada após simular este usuário será registrada como sendo feita por ele. Use com responsabilidade."
+      impersonate_user: "Simular Usuario"
+      impersonate_warning: "Acoes serao registradas como o usuario simulado."
       custom_attributes: "Atributos Personalizados"
 
-    # Super Admins
     super_admins:
       title: "Super Administradores"
       new_super_admin: "Novo Super Admin"
       edit_super_admin: "Editar Super Admin"
 
-    # Access Tokens
     access_tokens:
       title: "Tokens de Acesso"
       new_token: "Novo Token"
       token: "Token"
-      owner: "Proprietário"
+      owner: "Proprietario"
       created: "Criado"
 
-    # Agent Bots
     agent_bots:
       title: "Bots"
       new_bot: "Novo Bot"
       edit_bot: "Editar Bot"
       bot_name: "Nome do Bot"
-      bot_description: "Descrição"
-      outgoing_url: "URL de Saída"
+      bot_description: "Descricao"
+      outgoing_url: "URL de Saida"
 
-    # Platform Apps
     platform_apps:
       title: "Aplicativos da Plataforma"
       new_app: "Novo Aplicativo"
       edit_app: "Editar Aplicativo"
       app_name: "Nome do Aplicativo"
 
-    # App Configs
     app_configs:
-      title: "Configurar Definições"
+      title: "Configurar Definicoes"
       submit: "Enviar"
       true_value: "Verdadeiro"
       false_value: "Falso"
       enabled: "Habilitado"
       disabled: "Desabilitado"
 
-    # Login
     login:
       welcome: "Boas-vindas, admin"
       email: "E-mail"
@@ -212,17 +195,15 @@ pt-BR:
       sign_in: "Entrar"
       forgot_password: "Esqueceu a senha?"
 
-    # Playground (Robin AI)
     playground:
       title: "Playground Robin AI"
       back: "Voltar"
       chat_with_source: "Converse com a fonte"
-      evaluate_efficiency: "e avalie sua eficiência."
+      evaluate_efficiency: "e avalie sua eficiencia."
       type_message: "Digite uma mensagem... [CMD/CTRL + Enter para enviar]"
-      error_message: "Erro: Não foi possível obter resposta. Por favor, verifique o console para mais detalhes."
+      error_message: "Erro: Nao foi possivel obter resposta. Verifique o console."
       send: "Enviar"
 
-    # Common
     common:
       edit: "Editar"
       delete: "Excluir"
@@ -232,51 +213,52 @@ pt-BR:
       back: "Voltar"
       confirm: "Confirmar"
       yes: "Sim"
-      no: "Não"
+      no: "Nao"
       loading: "Carregando..."
       no_data: "Nenhum dado encontrado"
-      actions: "Ações"
+      actions: "Acoes"
       details: "Detalhes"
       created_at: "Criado em"
       updated_at: "Atualizado em"
 
-  # Helpers for form labels
   helpers:
     label:
       account:
         name: "Nome"
         locale: "Idioma"
-        domain: "Domínio"
+        domain: "Dominio"
         support_email: "E-mail de Suporte"
-        auto_resolve_duration: "Duração do Auto-resolver"
+        auto_resolve_duration: "Duracao do Auto-resolver"
         limits: "Limites"
         status: "Status"
+        users: "Usuarios"
+        conversations: "Conversas"
       user:
         name: "Nome"
-        display_name: "Nome de Exibição"
+        display_name: "Nome de Exibicao"
         email: "E-mail"
         password: "Senha"
-        password_confirmation: "Confirmação de Senha"
+        password_confirmation: "Confirmacao de Senha"
         type: "Tipo"
         custom_attributes: "Atributos Personalizados"
       account_user:
-        role: "Função"
+        role: "Funcao"
         availability: "Disponibilidade"
         auto_offline: "Auto Offline"
       super_admin:
         email: "E-mail"
         password: "Senha"
-        password_confirmation: "Confirmação de Senha"
+        password_confirmation: "Confirmacao de Senha"
       access_token:
-        owner_type: "Tipo do Proprietário"
-        owner_id: "ID do Proprietário"
+        owner_type: "Tipo do Proprietario"
+        owner_id: "ID do Proprietario"
         token: "Token"
       agent_bot:
         name: "Nome"
-        description: "Descrição"
-        outgoing_url: "URL de Saída"
+        description: "Descricao"
+        outgoing_url: "URL de Saida"
         bot_type: "Tipo do Bot"
-        bot_config: "Configuração do Bot"
+        bot_config: "Configuracao do Bot"
       platform_app:
         name: "Nome"
       installation_config:
@@ -284,7 +266,6 @@ pt-BR:
         value: "Valor"
         locked: "Bloqueado"
 
-  # Date/Time formats
   date:
     formats:
       default: "%d/%m/%Y"
@@ -294,27 +275,50 @@ pt-BR:
     formats:
       default: "%d/%m/%Y %H:%M"
       short: "%d/%m %H:%M"
-      long: "%d de %B de %Y às %H:%M"
+      long: "%d de %B de %Y as %H:%M"
 
-  # ActiveRecord model names
   activerecord:
     models:
-      account: "Conta"
-      user: "Usuário"
-      super_admin: "Super Admin"
-      access_token: "Token de Acesso"
-      agent_bot: "Bot"
-      platform_app: "Aplicativo"
-      installation_config: "Configuração"
+      account:
+        one: "Conta"
+        other: "Contas"
+      user:
+        one: "Usuario"
+        other: "Usuarios"
+      super_admin:
+        one: "Super Admin"
+        other: "Super Admins"
+      access_token:
+        one: "Token de Acesso"
+        other: "Tokens de Acesso"
+      agent_bot:
+        one: "Bot"
+        other: "Bots"
+      platform_app:
+        one: "Aplicativo"
+        other: "Aplicativos"
+      installation_config:
+        one: "Configuracao"
+        other: "Configuracoes"
     attributes:
       account:
         name: "Nome"
         locale: "Idioma"
-        domain: "Domínio"
+        domain: "Dominio"
         support_email: "E-mail de Suporte"
         status: "Status"
+        users: "Usuarios"
+        conversations: "Conversas"
       user:
         name: "Nome"
         email: "E-mail"
         password: "Senha"
         type: "Tipo"
+      access_token:
+        token: "Token"
+        owner: "Proprietario"
+      platform_app:
+        name: "Nome"
+      agent_bot:
+        name: "Nome"
+        description: "Descricao"

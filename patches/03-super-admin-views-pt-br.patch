@@ -1,0 +1,223 @@
+diff --git a/app/javascript/superadmin_pages/views/dashboard/Index.vue b/app/javascript/superadmin_pages/views/dashboard/Index.vue
+index f85ebea..969824a 100644
+--- a/app/javascript/superadmin_pages/views/dashboard/Index.vue
++++ b/app/javascript/superadmin_pages/views/dashboard/Index.vue
+@@ -22,7 +22,7 @@ const prepareData = sourceData => {
+         type: 'bar',
+         backgroundColor: 'rgb(31, 147, 255)',
+         yAxisID: 'y',
+-        label: 'Conversations',
++        label: 'Conversas',
+         data: data,
+       },
+     ],
+@@ -41,7 +41,7 @@ const { accountsCount, usersCount, inboxesCount, conversationsCount } =
+   <div class="w-full h-full">
+     <header class="main-content__header" role="banner">
+       <h1 id="page-title" class="main-content__page-title">
+-        {{ 'Admin Dashboard' }}
++        {{ 'Painel Administrativo' }}
+       </h1>
+     </header>
+ 
+@@ -49,19 +49,19 @@ const { accountsCount, usersCount, inboxesCount, conversationsCount } =
+       <div class="report--list">
+         <div class="report-card">
+           <div class="metric">{{ accountsCount }}</div>
+-          <div>{{ 'Accounts' }}</div>
++          <div>{{ 'Contas' }}</div>
+         </div>
+         <div class="report-card">
+           <div class="metric">{{ usersCount }}</div>
+-          <div>{{ 'Users' }}</div>
++          <div>{{ 'Usuarios' }}</div>
+         </div>
+         <div class="report-card">
+           <div class="metric">{{ inboxesCount }}</div>
+-          <div>{{ 'Inboxes' }}</div>
++          <div>{{ 'Caixas de entrada' }}</div>
+         </div>
+         <div class="report-card">
+           <div class="metric">{{ conversationsCount }}</div>
+-          <div>{{ 'Conversations' }}</div>
++          <div>{{ 'Conversas' }}</div>
+         </div>
+       </div>
+     </section>
+diff --git a/app/views/layouts/super_admin/application.html.erb b/app/views/layouts/super_admin/application.html.erb
+index 815c0fb..3881b37 100644
+--- a/app/views/layouts/super_admin/application.html.erb
++++ b/app/views/layouts/super_admin/application.html.erb
+@@ -18,8 +18,9 @@ By default, it renders:
+   <meta charset="utf-8">
+   <meta name="ROBOTS" content="NOODP">
+   <meta name="viewport" content="initial-scale=1">
++  <% installation_name = @global_config&.[]('INSTALLATION_NAME').presence || ENV['INSTALLATION_NAME'].presence || 'V4 Connect' %>
+   <title>
+-    <%= content_for(:title) %> - <%= application_title %>
++    <%= content_for(:title) %> - <%= installation_name %>
+   </title>
+   <%= render "stylesheet" %>
+   <%= vite_client_tag %>
+diff --git a/app/views/super_admin/application/_javascript.html.erb b/app/views/super_admin/application/_javascript.html.erb
+index d11bc2c..5197fe6 100644
+--- a/app/views/super_admin/application/_javascript.html.erb
++++ b/app/views/super_admin/application/_javascript.html.erb
+@@ -19,32 +19,3 @@ by providing a `content_for(:javascript)` block.
+     $.ajaxSetup({ async: false });
+   <% end %>
+ <% end %>
+-
+-<script>
+-window.chatwootSettings = {
+-  hideMessageBubble: true,
+-};
+-
+-(function(d,t) {
+-  var BASE_URL = '';
+-  var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+-  g.src= BASE_URL + "/packs/js/sdk.js";
+-  g.async = true;
+-  s.parentNode.insertBefore(g,s);
+-  g.onload=function(){
+-    window.chatwootSDK.run({
+-      websiteToken: '<%= ChatwootHub.support_config[:support_website_token] %>',
+-      baseUrl: '<%= ChatwootHub.support_config[:support_script_url] %>'
+-    })
+-  }
+-})(document,"script");
+-
+-window.addEventListener('chatwoot:ready', function() {
+-  window.$chatwoot.setUser('<%= ChatwootHub.installation_identifier %>', {
+-    identifier_hash: '<%= ChatwootHub.support_config[:support_identifier_hash] %>',
+-    email: '<%= SuperAdmin.first.email %>',
+-    name: '<%= SuperAdmin.first.name %>'
+-  });
+-})
+-
+-</script>
+diff --git a/app/views/super_admin/application/_navigation.html.erb b/app/views/super_admin/application/_navigation.html.erb
+index 787576d..0e8e0af 100644
+--- a/app/views/super_admin/application/_navigation.html.erb
++++ b/app/views/super_admin/application/_navigation.html.erb
+@@ -22,15 +22,15 @@ as defined by the routes in the `admin/` namespace
+ <div class="border-slate-100 border-r w-56 flex-shrink-0 justify-between h-full flex flex-col" role="navigation">
+   <div>
+     <div class="flex mx-4 mb-4 border-slate-100 border-b py-6">
+-      <%= link_to image_tag('/brand-assets/logo_thumbnail.svg', alt: 'Chatwoot Admin Dashboard', class: 'h-10'), super_admin_root_url %>
++      <%= link_to image_tag('/brand-assets/logo_thumbnail.svg', alt: 'V4 Connect Admin', class: 'h-10'), super_admin_root_url %>
+       <div class="flex flex-col ml-3">
+-        <div class="text-sm">Chatwoot <%= Chatwoot.config[:version] %></div>
+-        <div class="text-xs text-slate-700 mt-0.5">Super Admin Console</div>
++        <div class="text-sm">V4 Connect <%= Chatwoot.config[:version] %></div>
++        <div class="text-xs text-slate-700 mt-0.5">Console Super Admin</div>
+       </div>
+     </div>
+ 
+     <ul class="my-4">
+-      <%= render partial: "nav_item", locals: { icon: 'icon-grid-line', url: super_admin_root_url, label: 'Dashboard' } %>
++      <%= render partial: "nav_item", locals: { icon: 'icon-grid-line', url: super_admin_root_url, label: 'Painel' } %>
+       <% Administrate::Namespace.new(namespace).resources.each do |resource| %>
+         <% next if ["account_users", "access_tokens", "installation_configs", "dashboard", "devise/sessions", "app_configs", "instance_statuses", "settings"].include?  resource.resource %>
+         <%= render partial: "nav_item", locals: {
+@@ -41,15 +41,15 @@ as defined by the routes in the `admin/` namespace
+         %>
+ 
+       <% end %>
+-      <%= render 'settings_menu', open: settings_open? %>
++      <%= render 'settings_menu', open: settings_open?, label: 'Configuracoes' %>
+     </ul>
+   </div>
+   <div>
+     <ul class="my-4">
+-      <%= render partial: "nav_item", locals: { icon: 'icon-mist-fill', url: sidekiq_web_url, label: 'Sidekiq Dashboard' } %>
+-      <%= render partial: "nav_item", locals: { icon: 'icon-health-book-line', url: super_admin_instance_status_url, label: 'Instance Health' } %>
+-      <%= render partial: "nav_item", locals: { icon: 'icon-dashboard-line', url: '/', label: 'Agent Dashboard' } %>
+-      <%= render partial: "nav_item", locals: { icon: 'icon-logout-circle-r-line', url: super_admin_logout_url, label: 'Logout' } %>
++      <%= render partial: "nav_item", locals: { icon: 'icon-mist-fill', url: sidekiq_web_url, label: 'Painel Sidekiq' } %>
++      <%= render partial: "nav_item", locals: { icon: 'icon-health-book-line', url: super_admin_instance_status_url, label: 'Saúde da Instância' } %>
++      <%= render partial: "nav_item", locals: { icon: 'icon-dashboard-line', url: '/', label: 'Painel do Agente' } %>
++      <%= render partial: "nav_item", locals: { icon: 'icon-logout-circle-r-line', url: super_admin_logout_url, label: 'Sair' } %>
+     </ul>
+   </div>
+ </div>
+diff --git a/app/views/super_admin/application/_settings_menu.html.erb b/app/views/super_admin/application/_settings_menu.html.erb
+index 3d5173c..fcf5c9a 100644
+--- a/app/views/super_admin/application/_settings_menu.html.erb
++++ b/app/views/super_admin/application/_settings_menu.html.erb
+@@ -3,7 +3,7 @@
+     <summary class="-ml-1 flex items-center px-2 py-1.5 cursor-pointer rounded-lg <%= open ? 'text-woot-500 bg-slate-25' : 'text-slate-800 hover:text-woot-500 hover:bg-slate-25' %> list-none">
+       <%= link_to super_admin_settings_url, class: 'flex items-center flex-1' do %>
+         <svg width="16" height="16"><use xlink:href="#icon-settings-2-line" /></svg>
+-        <span class="ml-2 text-sm">Settings</span>
++        <span class="ml-2 text-sm">Configuracoes</span>
+       <% end %>
+       <svg class="ml-auto w-4 h-4 transition-transform duration-200 group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor">
+         <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+diff --git a/app/views/super_admin/dashboard/index.html.erb b/app/views/super_admin/dashboard/index.html.erb
+index 56bdeac..2b57eac 100644
+--- a/app/views/super_admin/dashboard/index.html.erb
++++ b/app/views/super_admin/dashboard/index.html.erb
+@@ -1,5 +1,5 @@
+ <% content_for(:title) do %>
+-  Admin Dashboard
++  Painel Administrativo
+ <% end %>
+ 
+ <%= render_vue_component('DashboardIndex', {
+diff --git a/app/views/super_admin/devise/sessions/new.html.erb b/app/views/super_admin/devise/sessions/new.html.erb
+index 6b79fbc..589cc2e 100644
+--- a/app/views/super_admin/devise/sessions/new.html.erb
++++ b/app/views/super_admin/devise/sessions/new.html.erb
+@@ -1,7 +1,8 @@
+ <!DOCTYPE html>
+ <html>
+   <head>
+-    <title>SuperAdmin | Chatwoot</title>
++    <% installation_name = ENV['INSTALLATION_NAME'].presence || 'V4 Connect' %>
++    <title>SuperAdmin | <%= installation_name %></title>
+     <%= vite_client_tag %>
+     <%= vite_javascript_tag 'superadmin' %>
+   </head>
+@@ -9,10 +10,10 @@
+     <div class="h-full w-full antialiased">
+       <main class="flex flex-col bg-woot-25 min-h-screen w-full py-20 sm:px-6 lg:px-8 dark:bg-slate-900">
+         <section class="max-w-5xl mx-auto">
+-          <img src="/brand-assets/logo.svg" alt="Chatwoot" class="mx-auto h-8 w-auto block dark:hidden">
+-          <img src="/brand-assets/logo_dark.svg" alt="Chatwoot" class="mx-auto h-8 w-auto hidden dark:block">
++          <img src="/brand-assets/logo.svg" alt="<%= installation_name %>" class="mx-auto h-8 w-auto block dark:hidden">
++          <img src="/brand-assets/logo_dark.svg" alt="<%= installation_name %>" class="mx-auto h-8 w-auto hidden dark:block">
+           <h2 class="mt-6 text-center text-3xl font-medium text-slate-900 dark:text-woot-50">
+-            Howdy, admin 👋
++            Boas-vindas, admin 👋
+           </h2>
+         </section>
+         <section class="bg-white shadow sm:mx-auto mt-11 sm:w-full sm:max-w-lg dark:bg-slate-800 p-11 sm:shadow-lg sm:rounded-lg mb-8 mt-15">
+@@ -23,22 +24,22 @@
+               <% end %>
+               <div class="mb-5">
+                 <label for="email_address" class="flex justify-between text-sm font-medium leading-6 text-slate-900 dark:text-white">
+-                Email Address
++                E-mail
+                 </label>
+                 <div class="mt-1">
+-                  <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "Email eg: someone@example.com", class: "block w-full rounded-md border-0 px-3 py-3 appearance-none shadow-sm ring-1 ring-inset text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-woot-500 sm:text-sm sm:leading-6 outline-none dark:bg-slate-700 dark:ring-slate-600 dark:focus:ring-woot-500 ring-slate-200" %>
++                  <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "Digite seu e-mail corporativo", class: "block w-full rounded-md border-0 px-3 py-3 appearance-none shadow-sm ring-1 ring-inset text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-woot-500 sm:text-sm sm:leading-6 outline-none dark:bg-slate-700 dark:ring-slate-600 dark:focus:ring-woot-500 ring-slate-200" %>
+                 </div>
+               </div>
+               <div class="mb-5">
+                 <label for="password" class="flex justify-between text-sm font-medium leading-6 text-slate-900 dark:text-white">
+-                  Password
++                  Senha
+                 </label>
+                 <div class="mt-1">
+-                  <%= f.password_field :password, autocomplete: "current-password",  placeholder: "Password", class: "block w-full rounded-md border-0 px-3 py-3 appearance-none shadow-sm ring-1 ring-inset text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-woot-500 sm:text-sm sm:leading-6 outline-none dark:bg-slate-700 dark:ring-slate-600 dark:focus:ring-woot-500 ring-slate-200" %>
++                  <%= f.password_field :password, autocomplete: "current-password",  placeholder: "Digite sua senha", class: "block w-full rounded-md border-0 px-3 py-3 appearance-none shadow-sm ring-1 ring-inset text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-woot-500 sm:text-sm sm:leading-6 outline-none dark:bg-slate-700 dark:ring-slate-600 dark:focus:ring-woot-500 ring-slate-200" %>
+                 </div>
+               </div>
+               <button type="submit" class="flex items-center w-full justify-center rounded-md bg-woot-500 py-3 px-3 text-base font-medium text-white shadow-sm hover:bg-woot-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-woot-500 cursor-pointer">
+-                <span>Login</span>
++                <span>Entrar</span>
+               </button>
+             <% end %>
+           </div>
