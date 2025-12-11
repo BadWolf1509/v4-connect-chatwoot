@@ -323,17 +323,42 @@ if [ -f "$SUPERADMIN_DASHBOARD" ]; then
   sed -i "s|label: 'Conversations'|label: 'Conversas'|g" "$SUPERADMIN_DASHBOARD"
 fi
 
-echo "Configurando fallback para INSTALLATION_NAME no vueapp..."
+echo "Configurando fallback para INSTALLATION_NAME em todos os layouts..."
+
+# Função para adicionar fallback em um arquivo
+add_installation_name_fallback() {
+  local file="$1"
+  if [ -f "$file" ]; then
+    # Adiciona linha Ruby logo após <html> para garantir fallback
+    sed -i '/<html>/a\<% @global_config['\''INSTALLATION_NAME'\''] = @global_config['\''INSTALLATION_NAME'\''].presence || ENV['\''INSTALLATION_NAME'\''].presence || '\''V4 Connect'\'' unless @global_config['\''INSTALLATION_NAME'\''].present? %>' "$file"
+    echo "  - Fallback aplicado: $file"
+  fi
+}
+
+# 1. vueapp.html.erb - Layout principal do dashboard
 VUEAPP_LAYOUT="app/views/layouts/vueapp.html.erb"
+add_installation_name_fallback "$VUEAPP_LAYOUT"
+
+# Atualizar favicons para usar brand-assets no vueapp
 if [ -f "$VUEAPP_LAYOUT" ]; then
-  # Adicionar variável installation_name no início do head
-  sed -i '/<head>/a\    <% installation_name = @global_config['\''INSTALLATION_NAME'\''].presence || ENV['\''INSTALLATION_NAME'\''].presence || '\''V4 Connect'\'' %>' "$VUEAPP_LAYOUT"
-  # Substituir referências diretas por installation_name
-  sed -i "s|<%= @global_config\['INSTALLATION_NAME'\] %>|<%= installation_name %>|g" "$VUEAPP_LAYOUT"
-  # Atualizar favicons para usar brand-assets
   sed -i 's|href="/favicon-|href="/brand-assets/favicon-|g' "$VUEAPP_LAYOUT"
   sed -i 's|href="/apple-icon-|href="/brand-assets/apple-touch-icon.png" /><!-- |g' "$VUEAPP_LAYOUT"
   sed -i 's|href="/android-icon-|href="/brand-assets/android-chrome-|g' "$VUEAPP_LAYOUT"
+fi
+
+# 2. survey/responses/show.html.erb - Página de survey
+add_installation_name_fallback "app/views/survey/responses/show.html.erb"
+
+# 3. widgets/show.html.erb - Widget embarcado
+add_installation_name_fallback "app/views/widgets/show.html.erb"
+
+# 4. Portal footer - já usa @global_config diretamente, então tratamos diferente
+PORTAL_FOOTER="app/views/public/api/v1/portals/_footer.html.erb"
+if [ -f "$PORTAL_FOOTER" ]; then
+  # Substituir @global_config['INSTALLATION_NAME'] por fallback inline
+  # Usando # como delimitador para evitar conflito com || do Ruby
+  sed -i "s#@global_config\['INSTALLATION_NAME'\]#(@global_config['INSTALLATION_NAME'].presence || 'V4 Connect')#g" "$PORTAL_FOOTER"
+  echo "  - Fallback aplicado: $PORTAL_FOOTER"
 fi
 
 echo "Configurando locale padrão PT-BR..."
