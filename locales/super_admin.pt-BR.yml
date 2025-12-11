@@ -19,8 +19,9 @@ pt-BR:
       update: "Atualizar"
       create: "Criar"
     form:
-      error: "erro impediu este registro de ser salvo"
-      errors: "%{count} erros impediram este registro de ser salvo"
+      errors:
+        one: "1 erro impediu que %{resource_name} fosse salvo"
+        other: "%{count} erros impediram que %{resource_name} fosse salvo"
     search:
       label: "Pesquisar %{resource}"
       clear: "Limpar pesquisa"
