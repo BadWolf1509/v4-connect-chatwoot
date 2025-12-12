@@ -80,6 +80,37 @@ if [ -f "$NEXT_COLORS_FILE" ]; then
   echo "  - Cor de seleção do sidebar alterada para vermelho"
 fi
 
+# Alterar cores do Super Admin (Administrate) para vermelho V4
+echo "Alterando cores do Super Admin para vermelho V4..."
+
+# 1. Variáveis principais do Administrate (utilities/_variables.scss)
+ADMIN_VARS="app/assets/stylesheets/administrate/utilities/_variables.scss"
+if [ -f "$ADMIN_VARS" ]; then
+  # Cor principal (botões): azul → vermelho V4
+  sed -i 's/\$color-woot: #1f93ff;/$color-woot: #e50914;/' "$ADMIN_VARS"
+  # Cor primária clara (hover, backgrounds): azul claro → vermelho claro
+  sed -i 's/\$color-primary-light: #c7e3ff;/$color-primary-light: #fecaca;/' "$ADMIN_VARS"
+  echo "  - Cor dos botões alterada para vermelho V4"
+fi
+
+# 2. Variáveis de biblioteca (library/_variables.scss)
+ADMIN_LIB_VARS="app/assets/stylesheets/administrate/library/_variables.scss"
+if [ -f "$ADMIN_LIB_VARS" ]; then
+  # Cor azul (links, action-color): azul → vermelho V4
+  sed -i 's/\$blue: #1f93ff;/$blue: #e50914;/' "$ADMIN_LIB_VARS"
+  echo "  - Cor dos links alterada para vermelho V4"
+fi
+
+# 3. Variáveis CSS do Super Admin index.scss
+SUPERADMIN_INDEX="app/javascript/dashboard/assets/scss/super_admin/index.scss"
+if [ -f "$SUPERADMIN_INDEX" ]; then
+  # Modo claro: --text-blue
+  sed -i 's/--text-blue: 8 109 224;/--text-blue: 229 9 20;/' "$SUPERADMIN_INDEX"
+  # Modo escuro: --text-blue
+  sed -i 's/--text-blue: 126 182 255;/--text-blue: 255 107 107;/' "$SUPERADMIN_INDEX"
+  echo "  - Variáveis CSS do Super Admin alteradas"
+fi
+
 echo "Aplicando tipografia V4 (Proxima Nova / Bebas Neue)..."
 TAILWIND_FILE="tailwind.config.js"
 # Inserir fontes V4 no início do array defaultSansFonts
@@ -125,81 +156,112 @@ sed -i "s|label: 'Agent Dashboard'|label: 'Painel do Agente'|g" "$NAV_FILE"
 sed -i "s|label: 'Logout'|label: 'Sair'|g" "$NAV_FILE"
 sed -i "s|Super Admin Console|Console Super Admin|g" "$NAV_FILE"
 
-# Menu de configurações (_settings_menu.html.erb)
-SETTINGS_MENU="app/views/super_admin/application/_settings_menu.html.erb"
-sed -i "s|>Settings<|>Configurações<|g" "$SETTINGS_MENU"
+# ============================================================
+# TRADUÇÃO VIA i18n - Views do Super Admin
+# ============================================================
+# As views são convertidas para usar t() e as traduções vêm do arquivo de locale
+# Isso é mais limpo e manutenível do que usar sed diretamente nos textos
 
-# Página de configurações (settings/show.html.erb)
+# Remover alerta de "Unauthorized premium changes" - não aplicável para V4 Connect
 SETTINGS_SHOW="app/views/super_admin/settings/show.html.erb"
-sed -i "s|Settings<|Configurações<|g" "$SETTINGS_SHOW"
-sed -i "s|Update your instance settings, access billing portal|Atualize as configurações da instância, acesse o portal de cobrança|g" "$SETTINGS_SHOW"
-sed -i "s|>Alert!<|>Alerta!<|g" "$SETTINGS_SHOW"
-sed -i "s|Unauthorized premium changes detected in Chatwoot. To keep using them, please upgrade your plan.|Alterações premium não autorizadas detectadas. Para continuar usando, atualize seu plano.|g" "$SETTINGS_SHOW"
-sed -i "s|Contact for help :|Contato para ajuda:|g" "$SETTINGS_SHOW"
-sed -i "s|Installation Identifier|Identificador da Instalação|g" "$SETTINGS_SHOW"
-sed -i "s|Current plan|Plano Atual|g" "$SETTINGS_SHOW"
-sed -i "s|>Refresh<|>Atualizar<|g" "$SETTINGS_SHOW"
-sed -i "s|>Manage<|>Gerenciar<|g" "$SETTINGS_SHOW"
-sed -i "s|Please add more licenses to add more users|Por favor, adicione mais licenças para adicionar mais usuários|g" "$SETTINGS_SHOW"
-sed -i "s|Need help?|Precisa de ajuda?|g" "$SETTINGS_SHOW"
-sed -i "s|Do you face any issues? We are here to help.|Está com algum problema? Estamos aqui para ajudar.|g" "$SETTINGS_SHOW"
-sed -i "s|>Community Support<|>Suporte da Comunidade<|g" "$SETTINGS_SHOW"
-sed -i "s|>Chat Support<|>Suporte por Chat<|g" "$SETTINGS_SHOW"
-sed -i "s|>Features<|>Funcionalidades<|g" "$SETTINGS_SHOW"
+sed -i '/CHATWOOT_INSTALLATION_CONFIG_RESET_WARNING/,/sales@chatwoot.com/d' "$SETTINGS_SHOW"
+sed -i '/<section class="main-content__body px-8">/{n;/^  <% end %>/d}' "$SETTINGS_SHOW"
+echo "  - Alerta de premium changes removido"
 
-# Página de configuração de app (app_configs/show.html.erb)
-APP_CONFIG="app/views/super_admin/app_configs/show.html.erb"
-sed -i "s|Configure Settings|Configurar Definições|g" "$APP_CONFIG"
-sed -i "s|>Submit<|>Enviar<|g" "$APP_CONFIG"
+# Converter views para usar i18n (t())
+echo "Convertendo views do Super Admin para i18n..."
+bash "${BUILD_ROOT}/scripts/convert_views_to_i18n.sh"
 
-# Reset cache (accounts/_reset_cache.html.erb)
-RESET_CACHE="app/views/super_admin/accounts/_reset_cache.html.erb"
-sed -i "s|Reset Frontend Cache|Limpar Cache do Frontend|g" "$RESET_CACHE"
-sed -i "s|This will clear the IndexedDB cache keys from redis|Isso irá limpar as chaves de cache do IndexedDB no Redis|g" "$RESET_CACHE"
-sed -i "s|Next reload would fetch the data from backend|O próximo carregamento buscará os dados do backend|g" "$RESET_CACHE"
+# ============================================================
+# TRADUÇÃO VIA SED - Arquivos que não usam i18n
+# ============================================================
+# Estes arquivos têm textos hardcoded que não passam pelo sistema i18n do Rails
 
-# Seed data (accounts/_seed_data.html.erb)
-SEED_DATA="app/views/super_admin/accounts/_seed_data.html.erb"
-sed -i "s|Generate Seed Data|Gerar Dados de Exemplo|g" "$SEED_DATA"
-sed -i "s|Click the button to generate seed data into this account for demos|Clique no botão para gerar dados de exemplo nesta conta para demonstrações|g" "$SEED_DATA"
-sed -i "s|Note: This will clear all the existing data in this account|Nota: Isso irá limpar todos os dados existentes nesta conta|g" "$SEED_DATA"
-
-# Impersonate user (users/_impersonate.erb)
-IMPERSONATE="app/views/super_admin/users/_impersonate.erb"
-if [ -f "$IMPERSONATE" ]; then
-  sed -i "s|Impersonate user|Simular usuário|g" "$IMPERSONATE"
-  sed -i "s|Caution:|Cuidado:|g" "$IMPERSONATE"
-  sed -i "s|Any actions executed after impersonate will appear as actions performed by the impersonated user|Quaisquer ações executadas após simular aparecerão como ações realizadas pelo usuário simulado|g" "$IMPERSONATE"
+# Traduzir FeaturesHelper (plan_details) - Ruby code, não usa i18n
+FEATURES_HELPER="app/helpers/super_admin/features_helper.rb"
+if [ -f "$FEATURES_HELPER" ]; then
+  sed -i "s|You are currently on the|Você está no plano|g" "$FEATURES_HELPER"
+  sed -i "s|plan with|com|g" "$FEATURES_HELPER"
+  sed -i "s|agents|agentes|g" "$FEATURES_HELPER"
+  sed -i "s|edition plan.|edição.|g" "$FEATURES_HELPER"
+  echo "  - FeaturesHelper traduzido"
 fi
+
+# Traduzir features.yml (nomes e descrições das funcionalidades)
+FEATURES_YML="app/helpers/super_admin/features.yml"
+if [ -f "$FEATURES_YML" ]; then
+  # Premium Features
+  sed -i "s|Enable AI-powered conversations with your customers.|Habilite conversas com IA para seus clientes.|g" "$FEATURES_YML"
+  sed -i "s|Configuration for controlling SAML Single Sign-On availability|Configuração para controlar a disponibilidade do SAML SSO|g" "$FEATURES_YML"
+  sed -i "s|Apply your own branding to this installation.|Aplique sua própria marca nesta instalação.|g" "$FEATURES_YML"
+  sed -i "s|Set limits to auto-assigning conversations to your agents.|Defina limites para atribuição automática de conversas aos agentes.|g" "$FEATURES_YML"
+  sed -i "s|Track and trace account activities with ease with detailed audit logs.|Rastreie atividades da conta com logs de auditoria detalhados.|g" "$FEATURES_YML"
+  sed -i "s|Disable branding on live-chat widget and external emails.|Desabilite a marca no widget de chat e e-mails externos.|g" "$FEATURES_YML"
+
+  # Product Features
+  sed -i "s|Allow agents to create help center articles and publish them in a portal.|Permita que agentes criem artigos e publiquem em um portal.|g" "$FEATURES_YML"
+
+  # Communication Channels
+  sed -i "s|Improve your customer experience using a live chat on your website.|Melhore a experiência do cliente com chat ao vivo no seu site.|g" "$FEATURES_YML"
+  sed -i "s|Manage your email customer interactions from Chatwoot.|Gerencie interações de e-mail com clientes.|g" "$FEATURES_YML"
+  sed -i "s|Manage your SMS customer interactions from Chatwoot.|Gerencie interações de SMS com clientes.|g" "$FEATURES_YML"
+  sed -i "s|Stay connected with your customers on Facebook & Instagram.|Conecte-se com clientes no Facebook e Instagram.|g" "$FEATURES_YML"
+  sed -i "s|Stay connected with your customers on Instagram|Conecte-se com seus clientes no Instagram|g" "$FEATURES_YML"
+  sed -i "s|Manage your WhatsApp business interactions from Chatwoot.|Gerencie interações do WhatsApp Business.|g" "$FEATURES_YML"
+  sed -i "s|Manage your Telegram customer interactions from Chatwoot.|Gerencie interações do Telegram com clientes.|g" "$FEATURES_YML"
+  sed -i "s|Manage your Line customer interactions from Chatwoot.|Gerencie interações do Line com clientes.|g" "$FEATURES_YML"
+
+  # OAuth & Authentication
+  sed -i "s|Configuration for setting up Google OAuth Integration|Configuração para integração OAuth do Google|g" "$FEATURES_YML"
+  sed -i "s|Configuration for setting up Microsoft Email|Configuração para e-mail da Microsoft|g" "$FEATURES_YML"
+
+  # Third-party Integrations
+  sed -i "s|Configuration for setting up Linear Integration|Configuração para integração com Linear|g" "$FEATURES_YML"
+  sed -i "s|Configuration for setting up Notion Integration|Configuração para integração com Notion|g" "$FEATURES_YML"
+  sed -i "s|Configuration for setting up Slack Integration|Configuração para integração com Slack|g" "$FEATURES_YML"
+  sed -i "s|Configuration for setting up WhatsApp Embedded Integration|Configuração para WhatsApp Embedded|g" "$FEATURES_YML"
+  sed -i "s|Configuration for setting up Shopify Integration|Configuração para integração com Shopify|g" "$FEATURES_YML"
+
+  # Nomes das features (traduzir apenas alguns que fazem sentido)
+  sed -i "s|name: 'Custom Branding'|name: 'Marca Personalizada'|g" "$FEATURES_YML"
+  sed -i "s|name: 'Agent Capacity'|name: 'Capacidade do Agente'|g" "$FEATURES_YML"
+  sed -i "s|name: 'Audit Logs'|name: 'Logs de Auditoria'|g" "$FEATURES_YML"
+  sed -i "s|name: 'Disable Branding'|name: 'Desabilitar Marca'|g" "$FEATURES_YML"
+  sed -i "s|name: 'Help Center'|name: 'Central de Ajuda'|g" "$FEATURES_YML"
+  sed -i "s|name: 'Live Chat'|name: 'Chat ao Vivo'|g" "$FEATURES_YML"
+
+  echo "  - Features traduzidas para PT-BR"
+fi
+
+# NOTA: As views abaixo são tratadas pelo script convert_views_to_i18n.sh:
+# - app_configs/show.html.erb
+# - accounts/_reset_cache.html.erb
+# - accounts/_seed_data.html.erb
+# - users/_impersonate.erb
+# Elas usam t() para tradução, lendo de config/locales/super_admin.pt-BR.yml
 
 # Copiando arquivo de locale completo para super_admin
 echo "Copiando arquivo de locale PT-BR completo para super_admin..."
 cp "${BUILD_ROOT}/locales/super_admin.pt-BR.yml" config/locales/super_admin.pt-BR.yml
 
-# Dashboard principal (index.html.erb)
-DASHBOARD_FILE="app/views/super_admin/dashboard/index.html.erb"
-if [ -f "$DASHBOARD_FILE" ]; then
-  sed -i "s|Admin Dashboard|Painel Administrativo|g" "$DASHBOARD_FILE"
-  sed -i "s|>Accounts<|>Contas<|g" "$DASHBOARD_FILE"
-  sed -i "s|>Users<|>Usuários<|g" "$DASHBOARD_FILE"
-  sed -i "s|>Inboxes<|>Caixas de Entrada<|g" "$DASHBOARD_FILE"
-  sed -i "s|>Conversations<|>Conversas<|g" "$DASHBOARD_FILE"
-  sed -i "s|>Total<|>Total<|g" "$DASHBOARD_FILE"
-  sed -i "s|>Active<|>Ativos<|g" "$DASHBOARD_FILE"
-fi
+# NOTA: dashboard/index.html.erb e instance_statuses/show.html.erb
+# são tratados pelo script convert_views_to_i18n.sh
 
-# Instance Status page
-INSTANCE_STATUS="app/views/super_admin/instance_status/show.html.erb"
-if [ -f "$INSTANCE_STATUS" ]; then
-  sed -i "s|Instance Status|Status da Instância|g" "$INSTANCE_STATUS"
-  sed -i "s|>Metric<|>Métrica<|g" "$INSTANCE_STATUS"
-  sed -i "s|>Value<|>Valor<|g" "$INSTANCE_STATUS"
-  sed -i "s|Chatwoot Version|Versão do V4 Connect|g" "$INSTANCE_STATUS"
-  sed -i "s|Postgres Version|Versão do PostgreSQL|g" "$INSTANCE_STATUS"
-  sed -i "s|Redis Version|Versão do Redis|g" "$INSTANCE_STATUS"
-  sed -i "s|Sidekiq Status|Status do Sidekiq|g" "$INSTANCE_STATUS"
-  sed -i "s|>Running<|>Rodando<|g" "$INSTANCE_STATUS"
-  sed -i "s|>Stopped<|>Parado<|g" "$INSTANCE_STATUS"
+# Instance Status - traduzir nomes de métricas no CONTROLLER
+INSTANCE_STATUS_CONTROLLER="app/controllers/super_admin/instance_statuses_controller.rb"
+if [ -f "$INSTANCE_STATUS_CONTROLLER" ]; then
+  sed -i "s|'Chatwoot version'|'Versão do V4 Connect'|g" "$INSTANCE_STATUS_CONTROLLER"
+  sed -i "s|'Postgres alive'|'PostgreSQL ativo'|g" "$INSTANCE_STATUS_CONTROLLER"
+  sed -i "s|'Redis alive'|'Redis ativo'|g" "$INSTANCE_STATUS_CONTROLLER"
+  sed -i "s|'Redis version'|'Versão do Redis'|g" "$INSTANCE_STATUS_CONTROLLER"
+  sed -i "s|'Redis number of connected clients'|'Clientes Redis conectados'|g" "$INSTANCE_STATUS_CONTROLLER"
+  sed -i "s|\"Redis 'maxclients' setting\"|'Configuração maxclients Redis'|g" "$INSTANCE_STATUS_CONTROLLER"
+  sed -i "s|'Redis memory used'|'Memória Redis usada'|g" "$INSTANCE_STATUS_CONTROLLER"
+  sed -i "s|'Redis memory peak'|'Pico de memória Redis'|g" "$INSTANCE_STATUS_CONTROLLER"
+  sed -i "s|'Redis total memory available'|'Memória total Redis disponível'|g" "$INSTANCE_STATUS_CONTROLLER"
+  sed -i "s|\"Redis 'maxmemory' setting\"|'Configuração maxmemory Redis'|g" "$INSTANCE_STATUS_CONTROLLER"
+  sed -i "s|\"Redis 'maxmemory_policy' setting\"|'Política maxmemory Redis'|g" "$INSTANCE_STATUS_CONTROLLER"
+  echo "  - Métricas de Instance Status traduzidas"
 fi
 
 # Formulário de contas
@@ -353,6 +415,26 @@ if [ -f "$SUPERADMIN_LAYOUT" ]; then
   # Substitui a linha que define installation_name para sempre usar 'V4 Connect'
   sed -i "s/<% installation_name = @global_config.*%>/<% installation_name = 'V4 Connect' %>/" "$SUPERADMIN_LAYOUT"
   echo "  - Título forçado para 'V4 Connect'"
+fi
+
+# Sobrescrever método application_title do Administrate para usar "V4 Connect"
+# Este é o método que define o título na aba do navegador do Super Admin
+echo "Sobrescrevendo application_title no Super Admin controller..."
+SUPERADMIN_CONTROLLER="app/controllers/super_admin/application_controller.rb"
+if [ -f "$SUPERADMIN_CONTROLLER" ]; then
+  # Adicionar método application_title antes do primeiro "private"
+  # O método helper_method :application_title torna disponível nas views
+  if ! grep -q "def application_title" "$SUPERADMIN_CONTROLLER"; then
+    # Inserir antes da linha "private" usando sed com múltiplas linhas
+    sed -i '/^  private$/i\
+  # Sobrescreve o título do Administrate para exibir "V4 Connect"\
+  def application_title\
+    '"'"'V4 Connect'"'"'\
+  end\
+  helper_method :application_title\
+' "$SUPERADMIN_CONTROLLER"
+    echo "  - Método application_title adicionado"
+  fi
 fi
 
 echo "Aplicando traduções PT-BR do frontend (Assignment Policy, Sidebar)..."
