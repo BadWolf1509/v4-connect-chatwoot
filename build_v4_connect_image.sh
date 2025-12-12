@@ -69,6 +69,17 @@ else
   echo "  - AVISO: Cores podem não ter sido aplicadas corretamente"
 fi
 
+# Alterar cor de seleção do sidebar (--text-blue) para vermelho V4
+echo "Alterando cor de seleção do sidebar para vermelho V4..."
+NEXT_COLORS_FILE="app/javascript/dashboard/assets/scss/_next-colors.scss"
+if [ -f "$NEXT_COLORS_FILE" ]; then
+  # Modo claro: #e50914 = RGB(229, 9, 20)
+  sed -i 's/--text-blue: 8 109 224;/--text-blue: 229 9 20;/' "$NEXT_COLORS_FILE"
+  # Modo escuro: versão mais clara #ff6b6b = RGB(255, 107, 107)
+  sed -i 's/--text-blue: 126 182 255;/--text-blue: 255 107 107;/' "$NEXT_COLORS_FILE"
+  echo "  - Cor de seleção do sidebar alterada para vermelho"
+fi
+
 echo "Aplicando tipografia V4 (Proxima Nova / Bebas Neue)..."
 TAILWIND_FILE="tailwind.config.js"
 # Inserir fontes V4 no início do array defaultSansFonts
@@ -320,6 +331,29 @@ sed -i '/^RUN git rev-parse HEAD > \/app\/.git_sha$/d' docker/Dockerfile
 echo "Copiando brand-assets (logos/favicons)..."
 mkdir -p "${WORKDIR}/public/brand-assets"
 cp -r "${BUILD_ROOT}/branding/." "${WORKDIR}/public/brand-assets/"
+
+# Copiar favicons para /public/ raiz (usado pelo Super Admin que não tem links de favicon)
+echo "Copiando favicons para /public/ raiz (Super Admin)..."
+cp "${BUILD_ROOT}/branding/favicon.ico" "${WORKDIR}/public/favicon.ico"
+cp "${BUILD_ROOT}/branding/favicon-16x16.png" "${WORKDIR}/public/favicon-16x16.png"
+cp "${BUILD_ROOT}/branding/favicon-32x32.png" "${WORKDIR}/public/favicon-32x32.png"
+cp "${BUILD_ROOT}/branding/favicon-96x96.png" "${WORKDIR}/public/favicon-96x96.png"
+
+# Adicionar links de favicon ao layout do Super Admin
+echo "Adicionando favicon ao layout do Super Admin..."
+SUPERADMIN_LAYOUT="app/views/layouts/super_admin/application.html.erb"
+if [ -f "$SUPERADMIN_LAYOUT" ]; then
+  # Adicionar links de favicon após <meta name="viewport">
+  sed -i '/<meta name="viewport"/a\  <link rel="icon" type="image/x-icon" href="/favicon.ico">\
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">\
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">' "$SUPERADMIN_LAYOUT"
+  echo "  - Favicon adicionado ao Super Admin layout"
+
+  # Forçar "V4 Connect" no título do Super Admin (ignora INSTALLATION_NAME do banco)
+  # Substitui a linha que define installation_name para sempre usar 'V4 Connect'
+  sed -i "s/<% installation_name = @global_config.*%>/<% installation_name = 'V4 Connect' %>/" "$SUPERADMIN_LAYOUT"
+  echo "  - Título forçado para 'V4 Connect'"
+fi
 
 echo "Aplicando traduções PT-BR do frontend (Assignment Policy, Sidebar)..."
 node "${BUILD_ROOT}/scripts/apply_frontend_translations.js" \
