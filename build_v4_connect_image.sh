@@ -163,9 +163,10 @@ sed -i "s|Super Admin Console|Console Super Admin|g" "$NAV_FILE"
 # Isso é mais limpo e manutenível do que usar sed diretamente nos textos
 
 # Remover alerta de "Unauthorized premium changes" - não aplicável para V4 Connect
+# O bloco if/end e div precisa ser removido completamente para evitar tags órfãs
 SETTINGS_SHOW="app/views/super_admin/settings/show.html.erb"
-sed -i '/CHATWOOT_INSTALLATION_CONFIG_RESET_WARNING/,/sales@chatwoot.com/d' "$SETTINGS_SHOW"
-sed -i '/<section class="main-content__body px-8">/{n;/^  <% end %>/d}' "$SETTINGS_SHOW"
+# Remove o bloco completo: desde <% if Redis::Alfred... até <% end %> (incluindo </div>)
+sed -i '/CHATWOOT_INSTALLATION_CONFIG_RESET_WARNING/,/<% end %>/d' "$SETTINGS_SHOW"
 echo "  - Alerta de premium changes removido"
 
 # Converter views para usar i18n (t())
@@ -297,8 +298,8 @@ if [ -f "$SETTINGS_SHOW" ]; then
   sed -i 's|You have <%= User.count %> agents. Please add more licenses to add more users.|Você tem <%= User.count %> agentes. Adicione mais licenças para habilitar mais usuários.|g' "$SETTINGS_SHOW"
 
   # Need help section
-  sed -i 's|>Need help\?<|>Precisa de ajuda?<|g' "$SETTINGS_SHOW"
-  sed -i 's|>Do you face any issues\? We are here to help.<|>Está enfrentando problemas? Estamos aqui para ajudar.<|g' "$SETTINGS_SHOW"
+  sed -i 's|>Need help?<|>Precisa de ajuda?<|g' "$SETTINGS_SHOW"
+  sed -i 's|>Do you face any issues? We are here to help.<|>Está enfrentando problemas? Estamos aqui para ajudar.<|g' "$SETTINGS_SHOW"
 
   # Buttons
   sed -i 's|>Community Support<|>Suporte da Comunidade<|g' "$SETTINGS_SHOW"
