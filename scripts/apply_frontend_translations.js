@@ -19,13 +19,13 @@ const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
 console.log('Carregando traduções do Assignment Policy...');
 const assignmentPolicy = JSON.parse(fs.readFileSync(translationsPath, 'utf8'));
 
-// Adicionar traduções do sidebar
-settings.SETTINGS = settings.SETTINGS || {};
-settings.SETTINGS.AGENT_ASSIGNMENT = 'Atribuição de Agentes';
-settings.SETTINGS.SLA = 'SLA';
-settings.SETTINGS.CUSTOM_ROLES = 'Funções Personalizadas';
-settings.SETTINGS.AUDIT_LOGS = 'Auditoria';
-settings.SETTINGS.BETA = 'Beta';
+// Adicionar traduções do sidebar (seção SIDEBAR, não SETTINGS)
+settings.SIDEBAR = settings.SIDEBAR || {};
+settings.SIDEBAR.AGENT_ASSIGNMENT = 'Atribuição de Agentes';
+settings.SIDEBAR.SLA = 'SLA';
+settings.SIDEBAR.CUSTOM_ROLES = 'Funções Personalizadas';
+settings.SIDEBAR.AUDIT_LOGS = 'Auditoria';
+settings.SIDEBAR.BETA = 'Beta';
 
 // Adicionar traduções do Assignment Policy
 settings.ASSIGNMENT_POLICY = assignmentPolicy.ASSIGNMENT_POLICY || assignmentPolicy;
