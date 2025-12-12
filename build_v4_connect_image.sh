@@ -264,6 +264,65 @@ if [ -f "$INSTANCE_STATUS_CONTROLLER" ]; then
   echo "  - Métricas de Instance Status traduzidas"
 fi
 
+# ============================================================
+# Settings - Página de configurações (tradução direta via sed)
+# ============================================================
+SETTINGS_SHOW="app/views/super_admin/settings/show.html.erb"
+if [ -f "$SETTINGS_SHOW" ]; then
+  # Título da página (substitui "Settings" pelo texto em português)
+  sed -i 's|^  Settings$|  Configurações|g' "$SETTINGS_SHOW"
+
+  # Subtítulo
+  sed -i 's|Update your instance settings, access billing portal|Atualize as configurações da sua instância|g' "$SETTINGS_SHOW"
+
+  # Alert
+  sed -i 's|<strong class="font-bold">Alert!</strong>|<strong class="font-bold">Alerta!</strong>|g' "$SETTINGS_SHOW"
+  sed -i 's|Unauthorized premium changes detected in Chatwoot|Alterações premium não autorizadas detectadas|g' "$SETTINGS_SHOW"
+  sed -i 's|To keep using them, please upgrade your plan|Para continuar usando, atualize seu plano|g' "$SETTINGS_SHOW"
+  sed -i 's|Contact for help :|Contato para ajuda:|g' "$SETTINGS_SHOW"
+
+  # Installation Identifier
+  sed -i 's|>Installation Identifier<|>Identificador da Instalação<|g' "$SETTINGS_SHOW"
+
+  # Current plan
+  sed -i 's|>Current plan<|>Plano Atual<|g' "$SETTINGS_SHOW"
+
+  # Refresh
+  sed -i 's|>Refresh<|>Atualizar<|g' "$SETTINGS_SHOW"
+
+  # Manage
+  sed -i 's|>Manage<|>Gerenciar<|g' "$SETTINGS_SHOW"
+
+  # Agent limit warning
+  sed -i 's|You have <%= User.count %> agents. Please add more licenses to add more users.|Você tem <%= User.count %> agentes. Adicione mais licenças para habilitar mais usuários.|g' "$SETTINGS_SHOW"
+
+  # Need help section
+  sed -i 's|>Need help\?<|>Precisa de ajuda?<|g' "$SETTINGS_SHOW"
+  sed -i 's|>Do you face any issues\? We are here to help.<|>Está enfrentando problemas? Estamos aqui para ajudar.<|g' "$SETTINGS_SHOW"
+
+  # Buttons
+  sed -i 's|>Community Support<|>Suporte da Comunidade<|g' "$SETTINGS_SHOW"
+  sed -i 's|>Chat Support<|>Suporte por Chat<|g' "$SETTINGS_SHOW"
+
+  # Features section
+  sed -i 's|>Features<|>Funcionalidades<|g' "$SETTINGS_SHOW"
+
+  echo "  - settings/show.html.erb traduzido"
+fi
+
+# Botões de upgrade
+UPGRADE_COMMUNITY="app/views/super_admin/settings/_upgrade_button_community.html.erb"
+if [ -f "$UPGRADE_COMMUNITY" ]; then
+  sed -i 's|>Switch to Enterprise edition<|>Mudar para Enterprise<|g' "$UPGRADE_COMMUNITY"
+  echo "  - _upgrade_button_community.html.erb traduzido"
+fi
+
+UPGRADE_ENTERPRISE="app/views/super_admin/settings/_upgrade_button_enterprise.html.erb"
+if [ -f "$UPGRADE_ENTERPRISE" ]; then
+  sed -i 's|>Upgrade now<|>Atualizar agora<|g' "$UPGRADE_ENTERPRISE"
+  echo "  - _upgrade_button_enterprise.html.erb traduzido"
+fi
+
 # Formulário de contas
 ACCOUNT_FORM="app/views/super_admin/accounts/_form.html.erb"
 if [ -f "$ACCOUNT_FORM" ]; then
@@ -473,7 +532,8 @@ add_installation_name_fallback "$VUEAPP_LAYOUT"
 # Atualizar favicons para usar brand-assets no vueapp
 if [ -f "$VUEAPP_LAYOUT" ]; then
   sed -i 's|href="/favicon-|href="/brand-assets/favicon-|g' "$VUEAPP_LAYOUT"
-  sed -i 's|href="/apple-icon-|href="/brand-assets/apple-touch-icon.png" /><!-- |g' "$VUEAPP_LAYOUT"
+  # Corrigir apple-touch-icon: substituir href completo sem adicionar comentários
+  sed -i 's|href="/apple-icon-[^"]*"|href="/brand-assets/apple-touch-icon.png"|g' "$VUEAPP_LAYOUT"
   sed -i 's|href="/android-icon-|href="/brand-assets/android-chrome-|g' "$VUEAPP_LAYOUT"
 fi
 
