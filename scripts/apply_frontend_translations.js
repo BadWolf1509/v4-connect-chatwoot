@@ -24,13 +24,14 @@ settings.SETTINGS = settings.SETTINGS || {};
 settings.SETTINGS.AGENT_ASSIGNMENT = 'Atribuição de Agentes';
 settings.SETTINGS.SLA = 'SLA';
 settings.SETTINGS.CUSTOM_ROLES = 'Funções Personalizadas';
+settings.SETTINGS.AUDIT_LOGS = 'Auditoria';
 settings.SETTINGS.BETA = 'Beta';
 
 // Adicionar traduções do Assignment Policy
-settings.ASSIGNMENT_POLICY = assignmentPolicy;
+settings.ASSIGNMENT_POLICY = assignmentPolicy.ASSIGNMENT_POLICY || assignmentPolicy;
 
 // Salvar
 fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
 console.log('Traduções PT-BR aplicadas com sucesso!');
-console.log('  - Sidebar: AGENT_ASSIGNMENT, SLA, CUSTOM_ROLES, BETA');
+console.log('  - Sidebar: AGENT_ASSIGNMENT, SLA, CUSTOM_ROLES, AUDIT_LOGS, BETA');
 console.log('  - Assignment Policy: Seção completa');
