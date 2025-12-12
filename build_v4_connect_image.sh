@@ -45,18 +45,29 @@ sed -i 's|Finish Setup|Concluir Configuração|g' "$ONBOARDING_FILE"
 echo "Aplicando paleta de cores V4 (vermelho #e50914)..."
 COLORS_FILE="theme/colors.js"
 # Substituir a paleta woot de azul para vermelho V4
-sed -i "s/25: blue.blue2,/25: '#fef2f2',/" "$COLORS_FILE"
-sed -i "s/50: blue.blue3,/50: '#fee2e2',/" "$COLORS_FILE"
-sed -i "s/75: blue.blue4,/75: '#fecaca',/" "$COLORS_FILE"
-sed -i "s/100: blue.blue5,/100: '#fca5a5',/" "$COLORS_FILE"
-sed -i "s/200: blue.blue7,/200: '#f87171',/" "$COLORS_FILE"
-sed -i "s/300: blue.blue8,/300: '#ef4444',/" "$COLORS_FILE"
-sed -i "s/400: blueDark.blue11,/400: '#dc2626',/" "$COLORS_FILE"
-sed -i "s/500: blueDark.blue10,/500: '#e50914',/" "$COLORS_FILE"
-sed -i "s/600: blueDark.blue9,/600: '#c10812',/" "$COLORS_FILE"
-sed -i "s/700: blueDark.blue8,/700: '#9a060e',/" "$COLORS_FILE"
-sed -i "s/800: blueDark.blue6,/800: '#73050b',/" "$COLORS_FILE"
-sed -i "s/900: blueDark.blue2,/900: '#4c0307',/" "$COLORS_FILE"
+# Usando padrão regex mais flexível para garantir match
+sed -i "s/25: blue\.blue2,/25: '#fef2f2',/" "$COLORS_FILE"
+sed -i "s/50: blue\.blue3,/50: '#fee2e2',/" "$COLORS_FILE"
+sed -i "s/75: blue\.blue4,/75: '#fecaca',/" "$COLORS_FILE"
+sed -i "s/100: blue\.blue5,/100: '#fca5a5',/" "$COLORS_FILE"
+sed -i "s/200: blue\.blue7,/200: '#f87171',/" "$COLORS_FILE"
+sed -i "s/300: blue\.blue8,/300: '#ef4444',/" "$COLORS_FILE"
+sed -i "s/400: blueDark\.blue11,/400: '#dc2626',/" "$COLORS_FILE"
+sed -i "s/500: blueDark\.blue10,/500: '#e50914',/" "$COLORS_FILE"
+sed -i "s/600: blueDark\.blue9,/600: '#b20710',/" "$COLORS_FILE"
+sed -i "s/700: blueDark\.blue8,/700: '#80050b',/" "$COLORS_FILE"
+sed -i "s/800: blueDark\.blue6,/800: '#5c0308',/" "$COLORS_FILE"
+sed -i "s/900: blueDark\.blue2,/900: '#400306',/" "$COLORS_FILE"
+
+# Alterar a cor brand para vermelho V4
+sed -i "s/brand: '#.*'/brand: '#e50914'/" "$COLORS_FILE"
+
+# Verificar se as alterações foram aplicadas
+if grep -q "#e50914" "$COLORS_FILE"; then
+  echo "  - Cores V4 aplicadas com sucesso"
+else
+  echo "  - AVISO: Cores podem não ter sido aplicadas corretamente"
+fi
 
 echo "Aplicando tipografia V4 (Proxima Nova / Bebas Neue)..."
 TAILWIND_FILE="tailwind.config.js"
@@ -92,6 +103,10 @@ find app/javascript -name "*.json" -exec sed -i 's/"Chatwoot"/"V4 Connect"/g' {}
 echo "Aplicando tradução do super_admin para PT-BR..."
 # Navegação principal (_navigation.html.erb)
 NAV_FILE="app/views/super_admin/application/_navigation.html.erb"
+# IMPORTANTE: Alterar o nome no header de "Chatwoot" para "V4 Connect"
+sed -i "s|alt: 'Chatwoot Admin Dashboard'|alt: 'V4 Connect Admin'|g" "$NAV_FILE"
+sed -i "s|>Chatwoot <%= Chatwoot.config\[:version\] %><|>V4 Connect <%= Chatwoot.config[:version] %><|g" "$NAV_FILE"
+# Tradução dos labels
 sed -i "s|label: 'Dashboard'|label: 'Painel'|g" "$NAV_FILE"
 sed -i "s|label: 'Sidekiq Dashboard'|label: 'Painel Sidekiq'|g" "$NAV_FILE"
 sed -i "s|label: 'Instance Health'|label: 'Saúde da Instância'|g" "$NAV_FILE"
@@ -359,6 +374,28 @@ if [ -f "$PORTAL_FOOTER" ]; then
   # Usando # como delimitador para evitar conflito com || do Ruby
   sed -i "s#@global_config\['INSTALLATION_NAME'\]#(@global_config['INSTALLATION_NAME'].presence || 'V4 Connect')#g" "$PORTAL_FOOTER"
   echo "  - Fallback aplicado: $PORTAL_FOOTER"
+fi
+
+echo "Habilitando features premium/enterprise..."
+FEATURES_FILE="config/features.yml"
+if [ -f "$FEATURES_FILE" ]; then
+  # SLA - habilitar por padrão
+  sed -i '/^- name: sla$/,/^- name:/ { s/enabled: false/enabled: true/; }' "$FEATURES_FILE"
+
+  # Custom Roles - habilitar por padrão
+  sed -i '/^- name: custom_roles$/,/^- name:/ { s/enabled: false/enabled: true/; }' "$FEATURES_FILE"
+
+  # Audit Logs - habilitar por padrão
+  sed -i '/^- name: audit_logs$/,/^- name:/ { s/enabled: false/enabled: true/; }' "$FEATURES_FILE"
+
+  # Assignment V2 (Agent Assignment) - habilitar e remover flag internal
+  sed -i '/^- name: assignment_v2$/,/^- name:/ { s/enabled: false/enabled: true/; }' "$FEATURES_FILE"
+  sed -i '/^- name: assignment_v2$/,/^- name:/ { /chatwoot_internal: true/d; }' "$FEATURES_FILE"
+
+  echo "  - SLA habilitado"
+  echo "  - Custom Roles habilitado"
+  echo "  - Audit Logs habilitado"
+  echo "  - Assignment V2 habilitado"
 fi
 
 echo "Configurando locale padrão PT-BR..."
