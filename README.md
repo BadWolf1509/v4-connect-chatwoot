@@ -1,26 +1,93 @@
 # V4 Connect - Chatwoot Customizado
 
-Fork customizado do Chatwoot para a plataforma V4 Connect.
+Fork customizado do Chatwoot v4.8.0 para a plataforma V4 Connect, com foco em:
+- **Localização completa PT-BR** com suporte a caracteres especiais (acentos, ç)
+- **Branding V4 Connect** (vermelho #e50914)
+- **White-label** para o mercado brasileiro
 
-## Customizações
+## Status do Projeto
 
-- **Branding**: Logo e cores V4 Connect (vermelho #e50914)
-- **Tipografia**: Proxima Nova / Bebas Neue
-- **Tradução PT-BR**: Super Admin, Login, Onboarding
-- **Rebranding**: Chatwoot → V4 Connect em toda interface
+| Módulo | Status | Observações |
+|--------|--------|-------------|
+| Super Admin | ✅ Completo | Tradução via i18n + locale |
+| Login/Onboarding | ✅ Completo | Inclui placeholders |
+| Dashboard Admin | ✅ Completo | Componentes Vue traduzidos |
+| Instance Status | ✅ Completo | Métricas traduzidas no controller |
+| Navegação | ✅ Completo | Menus e links |
+| Features (nomes) | ✅ Completo | Via sed no build |
+| Branding | ✅ Completo | Logo, favicon, cores |
+
+## Arquitetura de Tradução
+
+O V4 Connect usa uma abordagem **híbrida** para tradução:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    FLUXO DE TRADUÇÃO                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. VIEWS (ERB Templates)                                       │
+│     └── convert_views_to_i18n.sh converte textos para t()       │
+│     └── Locale super_admin.pt-BR.yml fornece traduções          │
+│                                                                 │
+│  2. CONTROLLERS (Ruby)                                          │
+│     └── sed substitui strings hardcoded no build                │
+│     └── Ex: instance_statuses_controller.rb                     │
+│                                                                 │
+│  3. COMPONENTES VUE (Frontend)                                  │
+│     └── Node.js script aplica traduções no JSON de locale       │
+│     └── Ex: app/javascript/dashboard/i18n/locale/pt_BR/         │
+│                                                                 │
+│  4. FEATURES (YAML)                                             │
+│     └── sed substitui nomes e descrições                        │
+│     └── Ex: enterprise/app/models/enterprise/features.yml       │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Arquivos de Tradução
+
+| Arquivo | Propósito |
+|---------|-----------|
+| `locales/super_admin.pt-BR.yml` | Traduções do módulo Super Admin (com acentos) |
+| `scripts/convert_views_to_i18n.sh` | Converte views para usar i18n |
+| `scripts/apply_frontend_translations.js` | Traduções do dashboard Vue |
+| `build_v4_connect_image.sh` | Aplica todas as customizações no build |
+
+## Customizações Implementadas
+
+### Branding
+- Logo V4 Connect (SVG) em `/public/brand-assets/`
+- Favicon customizado
+- Cores: vermelho primário #e50914
+- Nome da instalação: "V4 Connect"
+
+### Traduções PT-BR
+- **Super Admin**: Login, Dashboard, Settings, Accounts, Users
+- **Navegação**: Menus laterais e superiores
+- **Instance Status**: Métricas (Versão, PostgreSQL, Redis, Sidekiq)
+- **Features**: Nomes e descrições das funcionalidades
+- **Onboarding**: Fluxo de criação de conta
+
+### Tipografia
+- Proxima Nova / Bebas Neue (via branding)
 
 ## Estrutura do Repositório
 
 ```
 v4-connect-chatwoot/
-├── .github/workflows/      # CI/CD automático
-├── branding/               # Logos e favicons
-├── patches/                # Patches de código (traduções, etc)
+├── .github/workflows/       # CI/CD automático (GitHub Actions)
+├── branding/                # Logos, favicons, assets visuais
+├── locales/
+│   └── super_admin.pt-BR.yml  # Traduções com acentos
 ├── scripts/
-│   ├── apply_branding.sh  # Aplicar branding no banco
-│   ├── deploy.sh          # Script de deploy na VPS
-│   └── quick-test.sh      # Validação rápida
-├── docker/                 # Configurações Docker
+│   ├── apply_branding.sh       # Configura branding no banco
+│   ├── apply_super_admin.sh    # Cria usuário super admin
+│   ├── convert_views_to_i18n.sh # Converte views para i18n
+│   ├── apply_frontend_translations.js # Traduções Vue
+│   ├── deploy.sh               # Deploy na VPS
+│   └── quick-test.sh           # Validação rápida
+├── docker/                  # Configurações Docker
 ├── build_v4_connect_image.sh  # Script de build principal
 └── .env.example
 ```
@@ -28,33 +95,33 @@ v4-connect-chatwoot/
 ## Workflow de Desenvolvimento
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    WORKFLOW DE DESENVOLVIMENTO               │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  1. Criar feature branch a partir de 'develop'              │
-│     └── git checkout develop                                │
-│     └── git checkout -b feature/minha-feature               │
-│                                                              │
-│  2. Fazer alterações e testar localmente                    │
-│     └── ./scripts/quick-test.sh                             │
-│                                                              │
-│  3. Push para origin                                        │
-│     └── git push origin feature/minha-feature               │
-│                                                              │
-│  4. Criar PR para 'develop'                                 │
-│     └── GitHub Actions builda (sem push para registry)      │
-│     └── Validar se build passou                             │
-│                                                              │
-│  5. Merge para 'develop' após aprovação                     │
-│                                                              │
-│  6. Quando pronto para produção: PR develop → main          │
-│     └── GitHub Actions builda + push para GHCR              │
-│                                                              │
-│  7. Na VPS: executar deploy                                 │
-│     └── ./scripts/deploy.sh                                 │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                    WORKFLOW DE DESENVOLVIMENTO                  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. Criar feature branch a partir de 'develop'                  │
+│     └── git checkout develop                                    │
+│     └── git checkout -b feature/minha-feature                   │
+│                                                                 │
+│  2. Fazer alterações e testar localmente                        │
+│     └── ./scripts/quick-test.sh                                 │
+│                                                                 │
+│  3. Push para origin                                            │
+│     └── git push origin feature/minha-feature                   │
+│                                                                 │
+│  4. Criar PR para 'develop'                                     │
+│     └── GitHub Actions builda (sem push para registry)          │
+│     └── Validar se build passou                                 │
+│                                                                 │
+│  5. Merge para 'develop' após aprovação                         │
+│                                                                 │
+│  6. Quando pronto para produção: PR develop → main              │
+│     └── GitHub Actions builda + push para GHCR                  │
+│                                                                 │
+│  7. Na VPS: executar deploy                                     │
+│     └── ./scripts/deploy.sh                                     │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### Branches
@@ -65,13 +132,19 @@ v4-connect-chatwoot/
 | `develop` | Desenvolvimento | ✅ | ❌ |
 | `feature/*` | Features | Via PR | ❌ |
 
-## Build Local
+## Build da Imagem
 
-### Pré-requisitos
-- Docker instalado
-- Git instalado
+### O que o build faz
 
-### Construir a imagem
+1. Clona Chatwoot v4.8.0
+2. Copia locale PT-BR para `config/locales/`
+3. Executa `convert_views_to_i18n.sh` (converte views)
+4. Aplica traduções via sed (controllers, features)
+5. Executa `apply_frontend_translations.js` (Vue)
+6. Copia branding para `public/brand-assets/`
+7. Builda imagem Docker
+
+### Build Local
 
 ```bash
 # Definir versão (padrão: v4.8.0)
@@ -82,168 +155,82 @@ export IMAGE_TAG=v4-connect/chatwoot:v4.8.0-branded
 ./build_v4_connect_image.sh
 ```
 
-## Desenvolvimento local (hot reload)
+### Build via GitHub Actions
 
-Para desenvolvimento rápido com hot reload, sem precisar rebuild da imagem:
+Qualquer push para `main` dispara build automático no GHCR:
+- Imagem: `ghcr.io/badwolf1509/v4-connect-chatwoot:latest`
 
-### 1. Preparar o ambiente Chatwoot
+## Desenvolvimento Local
+
+### Pré-requisitos
+- Docker instalado
+- Git instalado
+- Node.js (para scripts de tradução)
+
+### 1. Preparar ambiente
 
 ```bash
-# Clone o Chatwoot oficial (se ainda não tem)
+# Clone o Chatwoot oficial
 git clone https://github.com/chatwoot/chatwoot.git chatwoot-dev
 cd chatwoot-dev
 git checkout v4.8.0
 
-# Copie o branding do v4-connect-chatwoot
+# Copie o branding
 cp -r ../v4-connect-chatwoot/branding/* public/brand-assets/
 ```
 
-### 2. Configurar variáveis de ambiente
+### 2. Configurar .env
 
 ```bash
-# Crie o arquivo .env
 cp .env.example .env
 ```
 
-Edite o `.env` e defina **pelo menos** estas variáveis:
+Edite o `.env`:
 
 ```bash
-# Idioma padrão (CRÍTICO para PT-BR funcionar!)
 DEFAULT_LOCALE=pt_BR
-
-# Nome da instalação
 INSTALLATION_NAME=V4 Connect
-
-# Credenciais do banco
 POSTGRES_PASSWORD=chatwoot
-
-# Redis (opcional se não usar senha)
-REDIS_PASSWORD=chatwoot
-
-# Rails
 SECRET_KEY_BASE=replace_with_lengthy_secure_hex
 RAILS_ENV=development
 ```
 
-### 3. Subir os containers de desenvolvimento
+### 3. Subir containers
 
 ```bash
-# Subir PostgreSQL e Redis primeiro
 docker compose up -d postgres redis
-
-# Aguardar alguns segundos para o banco inicializar
 sleep 5
-
-# Subir Rails, Sidekiq, Vite e Mailhog
 docker compose up rails sidekiq vite mailhog
 ```
 
-### 4. Setup inicial do banco de dados
-
-Em **outro terminal**, na pasta `chatwoot-dev`:
+### 4. Setup do banco
 
 ```bash
-# Criar banco de dados
 docker compose exec rails bundle exec rails db:create
-
-# Carregar schema
 docker compose exec rails bundle exec rails db:schema:load
-
-# Popular com dados iniciais
 docker compose exec rails bundle exec rails db:seed
 ```
 
-### 5. Aplicar patches de tradução (opcional)
-
-Os patches de tradução PT-BR são aplicados automaticamente no build da imagem. Para desenvolvimento local, você pode:
-
-**Opção A - Aplicar patches manualmente:**
-```bash
-# Entrar no container Rails
-docker compose exec rails bash
-
-# Dentro do container, aplicar cada patch:
-cd /app
-git apply /caminho/para/patches/01-super-admin-login-pt-br.patch
-git apply /caminho/para/patches/02-onboarding-pt-br.patch
-# ... etc
-exit
-```
-
-**Opção B - Usar a imagem buildada:**
-```bash
-# Buildar a imagem V4 Connect e usar ela no docker-compose
-# (modifique docker-compose.yml para usar a imagem local)
-```
-
-### 6. Criar usuário Super Admin
-
-Volte para a pasta `v4-connect-chatwoot` e execute:
+### 5. Criar Super Admin
 
 ```bash
-# Usando variáveis de ambiente personalizadas
-ADMIN_EMAIL="seu.email@empresa.com" \
-ADMIN_NAME="Seu Nome" \
-ADMIN_PASSWORD="SuaSenhaSegura123" \
-./scripts/apply_super_admin.sh --container chatwoot-dev-rails-1
-
-# Ou usar os valores padrão do script
+cd ../v4-connect-chatwoot
 ./scripts/apply_super_admin.sh --container chatwoot-dev-rails-1
 ```
 
-### 7. Aplicar branding no banco de dados
+### 6. Aplicar branding
 
 ```bash
-# Configurar branding (logos, nome, cores)
-./scripts/apply_branding.sh --container chatwoot-dev-rails-1
-
-# Ou customizar o nome da instalação
-INSTALLATION_NAME="Minha Empresa" \
 ./scripts/apply_branding.sh --container chatwoot-dev-rails-1
 ```
 
-### 8. Acessar a aplicação
+### 7. Acessar
 
-- **Rails (Backend + Frontend)**: http://localhost:3000
-- **Vite HMR (Hot Module Replacement)**: http://localhost:3036/vite-dev/
-- **Mailhog (Emails de teste)**: http://localhost:8025
+- **Aplicação**: http://localhost:3000
+- **Vite HMR**: http://localhost:3036/vite-dev/
+- **Mailhog**: http://localhost:8025
 
-### 9. Login
-
-Acesse http://localhost:3000 e faça login com as credenciais do super admin criadas no passo 6.
-
-### 10. Desenvolvimento
-
-Agora você pode editar arquivos e ver as mudanças em tempo real:
-
-- **Arquivos Vue/JS**: Recarregamento automático via Vite HMR
-- **Arquivos ERB**: Recarregar a página no navegador
-- **Arquivos Ruby (controllers, models)**: Reiniciar o container Rails
-
-```bash
-# Para reiniciar apenas o Rails após mudanças em Ruby
-docker compose restart rails
-```
-
-### Estrutura de diretórios esperada
-
-```
-seu-workspace/
-├── v4-connect-chatwoot/     # Este repositório
-│   ├── branding/
-│   ├── patches/
-│   ├── scripts/
-│   └── build_v4_connect_image.sh
-│
-└── chatwoot-dev/            # Clone do Chatwoot oficial
-    ├── app/
-    ├── public/
-    │   └── brand-assets/    # ← Branding copiado aqui
-    ├── docker-compose.yaml
-    └── .env                 # ← Configurado no passo 2
-```
-
-## Deploy
+## Deploy em Produção
 
 ### Via GHCR (Recomendado)
 
@@ -251,74 +238,63 @@ seu-workspace/
 # Deploy da última versão
 ./scripts/deploy.sh
 
-# Deploy de uma tag específica
+# Deploy de tag específica
 ./scripts/deploy.sh -t v4.8.0
 
-# Ver status dos serviços
+# Ver status
 ./scripts/deploy.sh -s
 
-# Rollback para versão anterior
+# Rollback
 ./scripts/deploy.sh -r
-```
-
-### Via Imagem Local
-
-```bash
-# Usar imagem buildada localmente
-./scripts/deploy.sh -l
 ```
 
 ### Manual com Docker Swarm
 
 ```bash
-# Pull da imagem do GHCR
 docker pull ghcr.io/badwolf1509/v4-connect-chatwoot:latest
-
-# Atualizar serviços
 docker service update --image ghcr.io/badwolf1509/v4-connect-chatwoot:latest chatwoot_chatwoot-web
 docker service update --image ghcr.io/badwolf1509/v4-connect-chatwoot:latest chatwoot_chatwoot-worker
 ```
 
+## Adicionando Novas Traduções
+
+### Para views (ERB)
+
+1. Adicione a chave em `locales/super_admin.pt-BR.yml`
+2. Adicione o sed em `scripts/convert_views_to_i18n.sh`
+
+Exemplo:
+```yaml
+# locales/super_admin.pt-BR.yml
+pt_BR:
+  super_admin:
+    minha_pagina:
+      titulo: "Meu Título"
+```
+
+```bash
+# scripts/convert_views_to_i18n.sh
+sed -i "s|My Title|<%= t('super_admin.minha_pagina.titulo') %>|g" "$ARQUIVO"
+```
+
+### Para controllers (Ruby)
+
+Adicione sed direto em `build_v4_connect_image.sh`:
+
+```bash
+sed -i "s|'English text'|'Texto em português'|g" "app/controllers/..."
+```
+
+### Para Vue (Frontend)
+
+Edite `scripts/apply_frontend_translations.js` ou os arquivos JSON em `app/javascript/dashboard/i18n/locale/pt_BR/`.
+
 ## Versionamento
 
-Para criar uma release:
-
 ```bash
-# Na branch main
-git tag v4.8.0-v4connect-1
-git push origin v4.8.0-v4connect-1
-```
-
-O GitHub Actions irá:
-1. Buildar a imagem
-2. Fazer push para GHCR com a tag de versão
-3. Manter a tag `latest` apontando para main
-
-## Configuração
-
-### Aplicar Branding no Banco
-
-Use o script `apply_branding.sh` para configurar branding após deploy:
-
-```bash
-# Ver SQL sem executar
-./scripts/apply_branding.sh --dry-run
-
-# Aplicar via container Docker
-./scripts/apply_branding.sh --container chatwoot_chatwoot-web
-
-# Customizar nome da instalação
-INSTALLATION_NAME="Minha Empresa" ./scripts/apply_branding.sh --container chatwoot_chatwoot-web
-```
-
-### Variáveis de Ambiente
-
-Configure `INSTALLATION_NAME` no banco de dados para personalizar o nome exibido:
-
-```sql
-UPDATE installation_configs
-SET serialized_value = '"V4 Connect"'
-WHERE name = 'INSTALLATION_NAME';
+# Criar release
+git tag v4.8.0-v4connect-2
+git push origin v4.8.0-v4connect-2
 ```
 
 ## Imagens Docker
@@ -330,5 +306,6 @@ WHERE name = 'INSTALLATION_NAME';
 
 ## Baseado no Chatwoot
 
-- Versão base: v4.8.0
-- Repositório original: https://github.com/chatwoot/chatwoot
+- **Versão base**: v4.8.0
+- **Repositório original**: https://github.com/chatwoot/chatwoot
+- **Licença**: MIT (mesma do Chatwoot)
