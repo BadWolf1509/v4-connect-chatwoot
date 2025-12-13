@@ -195,6 +195,11 @@ pt_BR:
       sign_in: "Entrar"
       forgot_password: "Esqueceu a senha?"
 
+    theme:
+      light: "Tema claro"
+      dark: "Tema escuro"
+      system: "Seguir sistema"
+
     playground:
       title: "Playground Robin AI"
       back: "Voltar"
