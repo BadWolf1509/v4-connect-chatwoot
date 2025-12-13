@@ -226,11 +226,22 @@ if [ -f "$LAYOUT" ]; then
     });
   </script>'
 
-  # Inserir configuração do Chart.js antes de </body>
-  sed -i "s|</body>|${CHARTJS_CONFIG}\n</body>|" "$LAYOUT"
+  # Usar arquivos temporários para evitar problemas com caracteres especiais no sed
+  TEMP_DARK="/tmp/dark_mode_block.html"
+  TEMP_CHART="/tmp/chartjs_config.html"
 
-  # Inserir bloco antes de </head>
-  sed -i "s|</head>|${DARK_MODE_BLOCK}\n</head>|" "$LAYOUT"
+  # Escrever conteúdos em arquivos temporários
+  printf '%s\n' "$DARK_MODE_BLOCK" > "$TEMP_DARK"
+  printf '%s\n' "$CHARTJS_CONFIG" > "$TEMP_CHART"
+
+  # Inserir dark mode antes de </head> usando awk
+  awk -v file="$TEMP_DARK" '/<\/head>/ { while ((getline line < file) > 0) print line; close(file) } { print }' "$LAYOUT" > "${LAYOUT}.tmp" && mv "${LAYOUT}.tmp" "$LAYOUT"
+
+  # Inserir Chart.js config antes de </body> usando awk
+  awk -v file="$TEMP_CHART" '/<\/body>/ { while ((getline line < file) > 0) print line; close(file) } { print }' "$LAYOUT" > "${LAYOUT}.tmp" && mv "${LAYOUT}.tmp" "$LAYOUT"
+
+  # Limpar arquivos temporários
+  rm -f "$TEMP_DARK" "$TEMP_CHART"
 
   # Adicionar classes dark mode ao body e main (cores do app principal: #121213)
   sed -i 's|<body class="antialiased w-full h-full">|<body class="antialiased w-full h-full bg-white dark:bg-[#121213]">|g' "$LAYOUT"
