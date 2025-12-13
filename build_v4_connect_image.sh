@@ -19,6 +19,21 @@ echo "Aplicando patch de templates (super_admin PT-BR)..."
 cd "${WORKDIR}"
 git apply "${BUILD_ROOT}/patches/v4-connect.patch"
 
+echo "Configurando branding V4 Connect nos defaults..."
+CONFIG_FILE="config/installation_config.yml"
+# INSTALLATION_NAME - título da aba do navegador
+sed -i "s/value: 'Chatwoot'/value: 'V4 Connect'/" "$CONFIG_FILE"
+# BRAND_NAME - nome exibido em emails e widget
+sed -i "/^- name: BRAND_NAME/,/^- name:/{s/value: 'Chatwoot'/value: 'V4 Connect'/}" "$CONFIG_FILE"
+# BRAND_URL - URL do branding
+sed -i "s|value: 'https://www.chatwoot.com'|value: 'https://v4company.com'|g" "$CONFIG_FILE"
+# WIDGET_BRAND_URL - URL do widget
+sed -i "s|value: 'https://www.chatwoot.com/terms-of-service'|value: 'https://v4company.com/terms'|g" "$CONFIG_FILE"
+sed -i "s|value: 'https://www.chatwoot.com/privacy-policy'|value: 'https://v4company.com/privacy'|g" "$CONFIG_FILE"
+echo "  - INSTALLATION_NAME: V4 Connect"
+echo "  - BRAND_NAME: V4 Connect"
+echo "  - URLs de branding atualizadas"
+
 echo "Aplicando tradução do onboarding para PT-BR..."
 ONBOARDING_FILE="app/views/installation/onboarding/index.html.erb"
 # Title e installation_name
@@ -569,11 +584,48 @@ if [ -f "$FEATURES_FILE" ]; then
   sed -i '/^- name: assignment_v2$/,/^- name:/ { s/enabled: false/enabled: true/; }' "$FEATURES_FILE"
   sed -i '/^- name: assignment_v2$/,/^- name:/ { /chatwoot_internal: true/d; }' "$FEATURES_FILE"
 
+  # Disable Branding - habilitar por padrão
+  sed -i '/^- name: disable_branding$/,/^- name:/ { s/enabled: false/enabled: true/; }' "$FEATURES_FILE"
+
+  # Captain Integration - habilitar por padrão
+  sed -i '/^- name: captain_integration$/,/^- name:/ { s/enabled: false/enabled: true/; }' "$FEATURES_FILE"
+
+  # SAML SSO - habilitar por padrão
+  sed -i '/^- name: saml$/,/^- name:/ { s/enabled: false/enabled: true/; }' "$FEATURES_FILE"
+
+  # Companies - habilitar e remover flag internal
+  sed -i '/^- name: companies$/,/^- name:/ { s/enabled: false/enabled: true/; }' "$FEATURES_FILE"
+  sed -i '/^- name: companies$/,/^- name:/ { /chatwoot_internal: true/d; }' "$FEATURES_FILE"
+
+  # CRM Integration - habilitar por padrão
+  sed -i '/^- name: crm_integration$/,/^- name:/ { s/enabled: false/enabled: true/; }' "$FEATURES_FILE"
+
+  # Linear Integration - habilitar por padrão
+  sed -i '/^- name: linear_integration$/,/^- name:/ { s/enabled: false/enabled: true/; }' "$FEATURES_FILE"
+
+  # Notion Integration - habilitar por padrão
+  sed -i '/^- name: notion_integration$/,/^- name:/ { s/enabled: false/enabled: true/; }' "$FEATURES_FILE"
+
+  # WhatsApp Campaign - habilitar por padrão
+  sed -i '/^- name: whatsapp_campaign$/,/^- name:/ { s/enabled: false/enabled: true/; }' "$FEATURES_FILE"
+
   echo "  - SLA habilitado"
   echo "  - Custom Roles habilitado"
   echo "  - Audit Logs habilitado"
   echo "  - Assignment V2 habilitado"
+  echo "  - Disable Branding habilitado"
+  echo "  - Captain Integration habilitado"
+  echo "  - SAML SSO habilitado"
+  echo "  - Companies habilitado"
+  echo "  - CRM Integration habilitado"
+  echo "  - Linear/Notion Integration habilitado"
+  echo "  - WhatsApp Campaign habilitado"
 fi
+
+echo "Copiando rake task V4 Connect..."
+cp "${BUILD_ROOT}/lib/tasks/v4_connect.rake" "lib/tasks/"
+echo "  - lib/tasks/v4_connect.rake copiado"
+echo "  - Uso após db:setup: bundle exec rake v4_connect:setup"
 
 echo "Configurando locale padrão PT-BR..."
 APP_CONFIG="config/application.rb"
