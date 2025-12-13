@@ -512,6 +512,13 @@ if [ -f "$SUPERADMIN_CONTROLLER" ]; then
   fi
 fi
 
+echo "Aumentando largura do sidebar do app para 260px..."
+SIDEBAR_VUE="app/javascript/dashboard/components-next/sidebar/Sidebar.vue"
+if [ -f "$SIDEBAR_VUE" ]; then
+  sed -i 's|w-\[200px\] basis-\[200px\]|w-[260px] basis-[260px]|g' "$SIDEBAR_VUE"
+  echo "  - Sidebar: 200px → 260px"
+fi
+
 echo "Aplicando traduções PT-BR do frontend (Assignment Policy, Sidebar)..."
 node "${BUILD_ROOT}/scripts/apply_frontend_translations.js" \
   "app/javascript/dashboard/i18n/locale/pt_BR/settings.json" \

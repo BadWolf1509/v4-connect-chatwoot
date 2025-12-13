@@ -16,13 +16,16 @@ echo "============================================================"
 # ============================================================
 NAV="app/views/super_admin/application/_navigation.html.erb"
 if [ -f "$NAV" ]; then
+  # Aumentar largura do sidebar de 224px (w-56) para 288px (w-72)
+  sed -i "s|w-56 flex-shrink-0|w-72 flex-shrink-0|g" "$NAV"
+  # Traduções
   sed -i "s|label: 'Dashboard'|label: t('super_admin.navigation.dashboard')|g" "$NAV"
   sed -i "s|label: 'Sidekiq Dashboard'|label: t('super_admin.navigation.sidekiq')|g" "$NAV"
   sed -i "s|label: 'Instance Health'|label: t('super_admin.navigation.instance_health')|g" "$NAV"
   sed -i "s|label: 'Agent Dashboard'|label: t('super_admin.navigation.agent_panel')|g" "$NAV"
   sed -i "s|label: 'Logout'|label: t('super_admin.navigation.logout')|g" "$NAV"
   sed -i "s|alt: 'Chatwoot Admin Dashboard'|alt: t('super_admin.dashboard.admin_dashboard')|g" "$NAV"
-  echo "  [OK] application/_navigation.html.erb"
+  echo "  [OK] application/_navigation.html.erb (largura: w-72)"
 fi
 
 # ============================================================

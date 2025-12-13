@@ -169,7 +169,7 @@ if [ -n "$USE_CONTAINER" ]; then
     fi
 
     # Executar via rails runner no container
-    docker exec -i "$USE_CONTAINER" rails runner "
+    docker exec -i "$USE_CONTAINER" bundle exec rails runner "
         configs = {
             'INSTALLATION_NAME' => '${INSTALLATION_NAME}',
             'LOGO' => '${LOGO_URL}',
