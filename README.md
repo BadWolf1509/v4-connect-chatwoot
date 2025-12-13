@@ -160,6 +160,120 @@ export IMAGE_TAG=v4-connect/chatwoot:v4.8.0-branded
 Qualquer push para `main` dispara build automático no GHCR:
 - Imagem: `ghcr.io/badwolf1509/v4-connect-chatwoot:latest`
 
+## Fluxo de Desenvolvimento Iterativo
+
+O V4 Connect usa um fluxo de desenvolvimento que permite testar mudanças imediatamente no container e depois persistir no repositório.
+
+### Conceito
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│              FLUXO DE DESENVOLVIMENTO ITERATIVO                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. CONTAINER RODANDO (chatwoot-dev)                           │
+│     └── Chatwoot v4.8.0 com branding aplicado                  │
+│     └── Acessível em localhost:3000                            │
+│                                                                 │
+│  2. TESTE DIRETO NO CONTAINER                                  │
+│     └── docker exec para modificar arquivos                    │
+│     └── Mudanças refletem imediatamente (ou após restart)      │
+│     └── Iterar até funcionar                                   │
+│                                                                 │
+│  3. PERSISTIR NO REPOSITÓRIO                                   │
+│     └── Atualizar scripts (convert_views_to_i18n.sh, etc)     │
+│     └── Atualizar locales (super_admin.pt-BR.yml)              │
+│     └── Commit e push                                          │
+│                                                                 │
+│  4. VALIDAR BUILD                                              │
+│     └── PR para develop dispara build                          │
+│     └── Verificar se build passa                               │
+│     └── Merge quando aprovado                                  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Comandos Úteis
+
+```bash
+# Ver containers rodando
+docker ps --filter "name=chatwoot"
+
+# Executar comando no container
+docker exec chatwoot-dev-rails-1 sh -c "comando"
+
+# Ver arquivo no container
+docker exec chatwoot-dev-rails-1 sh -c "cat /app/caminho/arquivo"
+
+# Editar arquivo no container (via sed)
+docker exec chatwoot-dev-rails-1 sh -c "sed -i 's|antigo|novo|g' /app/caminho/arquivo"
+
+# Reiniciar container para aplicar mudanças
+docker restart chatwoot-dev-rails-1
+
+# Ver logs
+docker logs chatwoot-dev-rails-1 --tail 50
+
+# Copiar arquivo do container para local
+docker cp chatwoot-dev-rails-1:/app/caminho/arquivo ./arquivo-local
+```
+
+### Exemplo: Adicionando CSS
+
+1. **Teste no container:**
+```bash
+# Adicionar CSS diretamente
+docker exec chatwoot-dev-rails-1 sh -c "sed -i 's|COMENTARIO|COMENTARIO\n    .minha-classe { color: red; }|' /app/app/views/layouts/super_admin/application.html.erb"
+
+# Reiniciar
+docker restart chatwoot-dev-rails-1
+
+# Testar no browser (Ctrl+F5)
+```
+
+2. **Persistir no script:**
+```bash
+# Editar convert_views_to_i18n.sh
+# Adicionar a mesma regra CSS no bloco DARK_MODE_BLOCK
+```
+
+### Exemplo: Adicionando Tradução
+
+1. **Teste no container:**
+```bash
+# Modificar view
+docker exec chatwoot-dev-rails-1 sh -c "sed -i 's|English Text|<%= t(\"super_admin.chave\") %>|g' /app/app/views/super_admin/..."
+
+# Verificar se locale existe
+docker exec chatwoot-dev-rails-1 sh -c "cat /app/config/locales/super_admin.pt-BR.yml | grep chave"
+```
+
+2. **Persistir:**
+   - Adicionar chave em `locales/super_admin.pt-BR.yml`
+   - Adicionar sed em `scripts/convert_views_to_i18n.sh`
+
+### Dark Mode
+
+O dark mode do Super Admin é implementado via CSS inline no layout. O script `convert_views_to_i18n.sh` injeta:
+
+1. **Bloco `<style>`** com todas as regras CSS de dark mode
+2. **Bloco `<script>`** com:
+   - Detecção de tema salvo no localStorage
+   - Toggle de tema (claro/escuro/sistema)
+   - Listeners para mudança de preferência do sistema
+
+**Paleta de cores (igual ao app principal):**
+| Token | Cor | Uso |
+|-------|-----|-----|
+| Background | `#121213` | Fundo principal |
+| Solid-1 | `#17171a` | Sidebar, header |
+| Solid-2 | `#1d1e24` | Cards, inputs |
+| Solid-3 | `#2c2d36` | Hover states |
+| Border | `#343434` | Bordas |
+| Text Primary | `#edeef0` | Títulos |
+| Text Secondary | `#b0b4ba` | Texto normal |
+| Accent | `#e50914` | Botões, links hover |
+
 ## Desenvolvimento Local
 
 ### Pré-requisitos
@@ -303,6 +417,96 @@ git push origin v4.8.0-v4connect-2
 |----------|--------|
 | GHCR | `ghcr.io/badwolf1509/v4-connect-chatwoot:latest` |
 | Local | `v4-connect/chatwoot:v4.8.0-branded` |
+
+## Troubleshooting
+
+### Mudanças CSS não aparecem
+
+```bash
+# 1. Reiniciar container
+docker restart chatwoot-dev-rails-1
+
+# 2. Aguardar container ficar pronto
+docker logs chatwoot-dev-rails-1 --tail 5
+
+# 3. Hard refresh no browser
+# Ctrl+Shift+R ou Ctrl+F5
+```
+
+### Container não tem bash
+
+O container Alpine usa `sh` ao invés de `bash`:
+```bash
+# Errado
+docker exec container bash -c "..."
+
+# Correto
+docker exec container sh -c "..."
+```
+
+### SVG icons não mudam cor em dark mode
+
+SVGs usando `<use xlink:href>` precisam de tratamento especial:
+
+1. Adicionar `class` e `style` ao SVG:
+```html
+<svg class="feature-icon" style="fill: currentColor">
+  <use xlink:href="#icon-name" />
+</svg>
+```
+
+2. CSS com `fill` explícito:
+```css
+.dark .feature-icon { fill: #b0b4ba !important; }
+```
+
+### Scroll externo aparece no sidebar
+
+Quando o submenu expande além do viewport:
+```css
+[role="navigation"] {
+  height: 100vh !important;
+  overflow-y: auto !important;
+}
+```
+
+### Fundo branco aparece ao scrollar
+
+O layout Administrate força `background-color: #fff` no `html`. Solução:
+```css
+html, body {
+  background-color: rgb(var(--background-color)) !important;
+}
+```
+
+### Erro 500 na página de settings
+
+Verificar se o locale tem todas as chaves necessárias:
+```bash
+docker exec chatwoot-dev-rails-1 sh -c "cat /app/config/locales/super_admin.pt-BR.yml | grep -A 5 settings"
+```
+
+### Build falha no GitHub Actions
+
+1. Verificar se o script tem permissão de execução:
+```bash
+chmod +x scripts/*.sh
+git add scripts/*.sh
+git commit -m "fix: add execute permission to scripts"
+```
+
+2. Verificar sintaxe dos scripts:
+```bash
+shellcheck scripts/convert_views_to_i18n.sh
+```
+
+### Caracteres especiais não aparecem
+
+O arquivo YAML deve ter encoding UTF-8:
+```bash
+file locales/super_admin.pt-BR.yml
+# Deve mostrar: UTF-8 Unicode text
+```
 
 ## Baseado no Chatwoot
 

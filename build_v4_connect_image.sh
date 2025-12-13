@@ -123,6 +123,19 @@ if [ -f "$SUPERADMIN_INDEX" ]; then
   sed -i 's/--text-blue: 8 109 224;/--text-blue: 229 9 20;/' "$SUPERADMIN_INDEX"
   # Modo escuro: --text-blue
   sed -i 's/--text-blue: 126 182 255;/--text-blue: 255 107 107;/' "$SUPERADMIN_INDEX"
+  # Garantir que o fundo acompanhe o tema (evita buracos brancos no dark mode)
+  # Remove min-height antigo que criava scroll extra
+  sed -i '/v4-connect-body-background/,+5 { /min-height: 100vh;/d; }' "$SUPERADMIN_INDEX"
+  if ! grep -q "v4-connect-body-background" "$SUPERADMIN_INDEX"; then
+    cat <<'EOF' >> "$SUPERADMIN_INDEX"
+
+/* v4-connect-body-background */
+html,
+body {
+  background-color: rgb(var(--background-color));
+}
+EOF
+  fi
   echo "  - Variáveis CSS do Super Admin alteradas"
 fi
 
@@ -534,6 +547,17 @@ if [ -f "$SUPERADMIN_DASHBOARD" ]; then
   sed -i "s|{{ 'Inboxes' }}|{{ 'Caixas de entrada' }}|g" "$SUPERADMIN_DASHBOARD"
   sed -i "s|{{ 'Conversations' }}|{{ 'Conversas' }}|g" "$SUPERADMIN_DASHBOARD"
   sed -i "s|label: 'Conversations'|label: 'Conversas'|g" "$SUPERADMIN_DASHBOARD"
+  # Alterar cor das barras do gráfico de azul para vermelho V4
+  sed -i "s|backgroundColor: 'rgb(31, 147, 255)'|backgroundColor: 'rgb(229, 9, 20)'|g" "$SUPERADMIN_DASHBOARD"
+  echo "  - Dashboard traduzido e cor do gráfico alterada para vermelho V4"
+fi
+
+echo "Configurando cores do gráfico para dark mode..."
+BARCHART_VUE="app/javascript/shared/components/charts/BarChart.vue"
+if [ -f "$BARCHART_VUE" ]; then
+  # Adicionar cores para dark mode nos eixos do gráfico
+  sed -i "s|ticks: {|ticks: { color: document.documentElement.classList.contains('dark') ? '#94a3b8' : '#64748b',|g" "$BARCHART_VUE"
+  echo "  - BarChart configurado para dark mode"
 fi
 
 echo "Configurando fallback para INSTALLATION_NAME em todos os layouts..."
