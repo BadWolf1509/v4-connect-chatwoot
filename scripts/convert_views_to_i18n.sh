@@ -267,60 +267,75 @@ if [ -f "$NAV" ]; then
   sed -i "s|alt: 'Chatwoot Admin Dashboard'|alt: t('super_admin.dashboard.admin_dashboard')|g" "$NAV"
 
   # Adicionar informações do super admin logado e toggle de tema na seção inferior do sidebar
-  # Usa awk para identificar a segunda ocorrência do padrão </div>\n  <div>
+  # Usa awk para identificar o padrão específico: "  <div>" seguido por "    <ul class="my-4">" que contém sidekiq_web_url
+  # Esta abordagem é mais robusta que contar </div> tags
   awk '
-    /<\/div>/ { close_div++ }
-    close_div == 2 && /^  <div>$/ {
-      print $0
-      print "    <div class=\"px-4 py-3 border-t border-slate-100 dark:border-[#343434]\">"
-      print "      <div class=\"text-sm font-medium text-slate-900 dark:text-[#edeef0] truncate\"><%= current_super_admin.name %></div>"
-      print "      <div class=\"text-xs text-slate-500 dark:text-[#b0b4ba] truncate\"><%= current_super_admin.email %></div>"
-      print "      <!-- Theme Toggle -->"
-      print "      <div class=\"flex items-center gap-1 mt-3\">"
-      print "        <button onclick=\"setTheme('"'"'light'"'"')\" id=\"theme-light\" class=\"theme-toggle-btn p-1.5 rounded\" title=\"<%= t('"'"'super_admin.theme.light'"'"') %>\">"
-      print "          <svg class=\"w-4 h-4\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z\"></path></svg>"
-      print "        </button>"
-      print "        <button onclick=\"setTheme('"'"'dark'"'"')\" id=\"theme-dark\" class=\"theme-toggle-btn p-1.5 rounded\" title=\"<%= t('"'"'super_admin.theme.dark'"'"') %>\">"
-      print "          <svg class=\"w-4 h-4\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z\"></path></svg>"
-      print "        </button>"
-      print "        <button onclick=\"setTheme('"'"'system'"'"')\" id=\"theme-system\" class=\"theme-toggle-btn p-1.5 rounded\" title=\"<%= t('"'"'super_admin.theme.system'"'"') %>\">"
-      print "          <svg class=\"w-4 h-4\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z\"></path></svg>"
-      print "        </button>"
-      print "      </div>"
-      print "      <script>"
-      print "        function setTheme(theme) {"
-      print "          localStorage.setItem('"'"'super-admin-theme'"'"', theme);"
-      print "          var prefersDark = window.matchMedia('"'"'(prefers-color-scheme: dark)'"'"').matches;"
-      print "          if (theme === '"'"'dark'"'"' || (theme === '"'"'system'"'"' && prefersDark)) {"
-      print "            document.documentElement.classList.add('"'"'dark'"'"');"
-      print "          } else {"
-      print "            document.documentElement.classList.remove('"'"'dark'"'"');"
-      print "          }"
-      print "          updateThemeButtons(theme);"
-      print "        }"
-      print "        function updateThemeButtons(theme) {"
-      print "          ['"'"'light'"'"', '"'"'dark'"'"', '"'"'system'"'"'].forEach(function(t) {"
-      print "            var btn = document.getElementById('"'"'theme-'"'"' + t);"
-      print "            if (btn) {"
-      print "              if (t === theme) {"
-      print "                btn.classList.add('"'"'active'"'"');"
-      print "                btn.style.backgroundColor = '"'"'#353942'"'"';"
-      print "              } else {"
-      print "                btn.classList.remove('"'"'active'"'"');"
-      print "                btn.style.backgroundColor = '"'"'transparent'"'"';"
-      print "              }"
-      print "            }"
-      print "          });"
-      print "        }"
-      print "        document.addEventListener('"'"'DOMContentLoaded'"'"', function() {"
-      print "          var theme = localStorage.getItem('"'"'super-admin-theme'"'"') || '"'"'system'"'"';"
-      print "          updateThemeButtons(theme);"
-      print "        });"
-      print "      </script>"
-      print "    </div>"
-      next
+    {
+      # Guardar linha anterior para detectar padrão
+      if (NR > 1) {
+        # Se linha anterior era "  <div>" e esta linha começa com "    <ul" e há sidekiq adiante
+        if (prev_line ~ /^  <div>$/ && /^    <ul class="my-4">$/) {
+          # Verificar se estamos na seção inferior (contém sidekiq)
+          # Imprimir a linha <div> que estava guardada
+          print prev_line
+          # Inserir bloco de info do usuário e toggle de tema
+          print "    <div class=\"px-4 py-3 border-t border-slate-100 dark:border-[#343434]\">"
+          print "      <div class=\"text-sm font-medium text-slate-900 dark:text-[#edeef0] truncate\"><%= current_super_admin.name %></div>"
+          print "      <div class=\"text-xs text-slate-500 dark:text-[#b0b4ba] truncate\"><%= current_super_admin.email %></div>"
+          print "      <!-- Theme Toggle -->"
+          print "      <div class=\"flex items-center gap-1 mt-3\">"
+          print "        <button onclick=\"setTheme('"'"'light'"'"')\" id=\"theme-light\" class=\"theme-toggle-btn p-1.5 rounded\" title=\"<%= t('"'"'super_admin.theme.light'"'"') %>\">"
+          print "          <svg class=\"w-4 h-4\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z\"></path></svg>"
+          print "        </button>"
+          print "        <button onclick=\"setTheme('"'"'dark'"'"')\" id=\"theme-dark\" class=\"theme-toggle-btn p-1.5 rounded\" title=\"<%= t('"'"'super_admin.theme.dark'"'"') %>\">"
+          print "          <svg class=\"w-4 h-4\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z\"></path></svg>"
+          print "        </button>"
+          print "        <button onclick=\"setTheme('"'"'system'"'"')\" id=\"theme-system\" class=\"theme-toggle-btn p-1.5 rounded\" title=\"<%= t('"'"'super_admin.theme.system'"'"') %>\">"
+          print "          <svg class=\"w-4 h-4\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z\"></path></svg>"
+          print "        </button>"
+          print "      </div>"
+          print "      <script>"
+          print "        function setTheme(theme) {"
+          print "          localStorage.setItem('"'"'super-admin-theme'"'"', theme);"
+          print "          var prefersDark = window.matchMedia('"'"'(prefers-color-scheme: dark)'"'"').matches;"
+          print "          if (theme === '"'"'dark'"'"' || (theme === '"'"'system'"'"' && prefersDark)) {"
+          print "            document.documentElement.classList.add('"'"'dark'"'"');"
+          print "          } else {"
+          print "            document.documentElement.classList.remove('"'"'dark'"'"');"
+          print "          }"
+          print "          updateThemeButtons(theme);"
+          print "        }"
+          print "        function updateThemeButtons(theme) {"
+          print "          ['"'"'light'"'"', '"'"'dark'"'"', '"'"'system'"'"'].forEach(function(t) {"
+          print "            var btn = document.getElementById('"'"'theme-'"'"' + t);"
+          print "            if (btn) {"
+          print "              if (t === theme) {"
+          print "                btn.classList.add('"'"'active'"'"');"
+          print "                btn.style.backgroundColor = '"'"'#353942'"'"';"
+          print "              } else {"
+          print "                btn.classList.remove('"'"'active'"'"');"
+          print "                btn.style.backgroundColor = '"'"'transparent'"'"';"
+          print "              }"
+          print "            }"
+          print "          });"
+          print "        }"
+          print "        document.addEventListener('"'"'DOMContentLoaded'"'"', function() {"
+          print "          var theme = localStorage.getItem('"'"'super-admin-theme'"'"') || '"'"'system'"'"';"
+          print "          updateThemeButtons(theme);"
+          print "        });"
+          print "      </script>"
+          print "    </div>"
+          # Imprimir a linha atual (<ul>)
+          print $0
+          prev_line = ""
+          next
+        } else {
+          print prev_line
+        }
+      }
+      prev_line = $0
     }
-    { print }
+    END { if (prev_line != "") print prev_line }
   ' "$NAV" > "${NAV}.tmp" && mv "${NAV}.tmp" "$NAV"
 
   # Adicionar classes dark mode ao sidebar container (cores do app principal)
