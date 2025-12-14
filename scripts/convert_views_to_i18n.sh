@@ -46,6 +46,7 @@ if [ -f "$LAYOUT" ]; then
     .dark [role="navigation"] a:hover { color: #edeef0 !important; background-color: #2c2d36 !important; }
     .dark [role="navigation"] .hover\\:bg-slate-100:hover { background-color: #2c2d36 !important; }
     .dark [role="navigation"] .hover\\:bg-slate-50:hover { background-color: #2c2d36 !important; }
+    .dark [role="navigation"] .hover\\:bg-slate-25:hover { background-color: #2c2d36 !important; }
     .dark [role="navigation"] .bg-slate-25 { background-color: #1d1e24 !important; }
     .dark [role="navigation"] .bg-slate-50 { background-color: #1d1e24 !important; }
     .dark [role="navigation"] svg { color: #b0b4ba !important; }
@@ -86,13 +87,13 @@ if [ -f "$LAYOUT" ]; then
     .dark main a { color: #ff949d !important; }
     .dark main a:hover { color: #fed2e1 !important; }
 
-    /* === BUTTONS === */
-    .dark .button {
-      background-color: #2c2d36 !important;
+    /* === BUTTONS (apenas área principal) === */
+    .dark main .button {
+      background-color: #e50914 !important;
       color: #edeef0 !important;
       border-color: #343434 !important;
     }
-    .dark .button:hover { background-color: #353942 !important; }
+    .dark main .button:hover { background-color: #b20710 !important; }
     .dark .button--primary {
       background-color: #e50914 !important;
       border-color: #e50914 !important;
@@ -133,12 +134,27 @@ if [ -f "$LAYOUT" ]; then
     .dark p { color: #b0b4ba !important; }
 
     /* === THEME TOGGLE BUTTONS === */
+    /* Light mode */
+    .theme-toggle-btn {
+      background-color: transparent !important;
+      border: none !important;
+      color: #64748b !important;
+      cursor: pointer;
+    }
+    .theme-toggle-btn:hover { background-color: #f1f5f9 !important; color: #334155 !important; }
+    .theme-toggle-btn.active { background-color: #e2e8f0 !important; color: #1e293b !important; }
+    .theme-toggle-btn svg { stroke: currentColor !important; }
+    /* Dark mode */
     .dark .theme-toggle-btn {
       background-color: transparent !important;
       border: none !important;
+      color: #b0b4ba !important;
     }
-    .dark .theme-toggle-btn:hover { background-color: #2c2d36 !important; }
-    .dark .theme-toggle-btn.active { background-color: #353942 !important; }
+    .dark .theme-toggle-btn:hover { background-color: #2c2d36 !important; color: #edeef0 !important; }
+    .dark .theme-toggle-btn.active { background-color: #353942 !important; color: #edeef0 !important; }
+
+    /* === GLOBAL FOCUS COLOR (V4 Red) === */
+    :focus { outline-color: rgba(229, 9, 20, 0.6) !important; }
 
     /* === FEATURE CARDS ICONS === */
     .dark .feature-icon { fill: #b0b4ba !important; color: #b0b4ba !important; }
@@ -187,7 +203,7 @@ if [ -f "$LAYOUT" ]; then
     }
     .dark details summary:hover { background-color: #2c2d36 !important; }
     .dark details[open] summary { background-color: #1d1e24 !important; }
-    .dark details ul { background-color: #1d1e24 !important; }
+    .dark details ul { background-color: transparent !important; }
     .dark details ul li a {
       color: #b0b4ba !important;
       background-color: transparent !important;

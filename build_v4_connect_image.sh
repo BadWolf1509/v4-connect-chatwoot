@@ -582,6 +582,11 @@ if [ -f "$VUEAPP_LAYOUT" ]; then
   # Corrigir apple-touch-icon: substituir href completo sem adicionar comentários
   sed -i 's|href="/apple-icon-[^"]*"|href="/brand-assets/apple-touch-icon.png"|g' "$VUEAPP_LAYOUT"
   sed -i 's|href="/android-icon-|href="/brand-assets/android-chrome-|g' "$VUEAPP_LAYOUT"
+
+  # Adicionar CSS de styled scrollbar no sidebar (sobrescreve no-scrollbar)
+  echo "Adicionando styled scrollbar CSS ao layout principal..."
+  sed -i 's|<%= csrf_meta_tags %>|<%= csrf_meta_tags %>\n    <style>\n      /* === OVERRIDE no-scrollbar to show styled scrollbar (V4 Connect) === */\n      .no-scrollbar::-webkit-scrollbar { display: block !important; width: 6px !important; }\n      .no-scrollbar::-webkit-scrollbar-track { background: transparent !important; }\n      .no-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2) !important; border-radius: 3px !important; }\n      .no-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3) !important; }\n      .no-scrollbar { -ms-overflow-style: auto !important; scrollbar-width: thin !important; scrollbar-color: rgba(0,0,0,0.2) transparent !important; }\n      .dark .no-scrollbar { scrollbar-color: rgba(255,255,255,0.2) transparent !important; }\n      .dark .no-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2) !important; }\n      .dark .no-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3) !important; }\n    </style>|' "$VUEAPP_LAYOUT"
+  echo "  - Styled scrollbar CSS adicionado ao vueapp.html.erb"
 fi
 
 # 2. survey/responses/show.html.erb - Página de survey
