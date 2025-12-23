@@ -10,12 +10,14 @@ Fork customizado do Chatwoot v4.8.0 para a plataforma V4 Connect, com foco em:
 | Módulo | Status | Observações |
 |--------|--------|-------------|
 | Super Admin | ✅ Completo | Tradução via i18n + locale |
+| Dark Mode Super Admin | ✅ Completo | Tema escuro com toggle (claro/escuro/sistema) |
 | Login/Onboarding | ✅ Completo | Inclui placeholders |
 | Dashboard Admin | ✅ Completo | Componentes Vue traduzidos |
 | Instance Status | ✅ Completo | Métricas traduzidas no controller |
 | Navegação | ✅ Completo | Menus e links |
 | Features (nomes) | ✅ Completo | Via sed no build |
 | Branding | ✅ Completo | Logo, favicon, cores |
+| Styled Scrollbar | ✅ Completo | Sidebar do app principal com scrollbar estilizada |
 
 ## Arquitetura de Tradução
 
@@ -62,6 +64,19 @@ O V4 Connect usa uma abordagem **híbrida** para tradução:
 - Cores: vermelho primário #e50914
 - Nome da instalação: "V4 Connect"
 
+### Dark Mode (Super Admin)
+- Toggle de tema no sidebar (claro/escuro/sistema)
+- Informações do super admin logado (nome e email)
+- Persiste preferência no localStorage
+- Suporte a preferência do sistema operacional
+- Paleta de cores consistente com o app principal
+
+### UI Enhancements
+- Sidebar expandida (260px) para melhor legibilidade
+- Styled scrollbar no sidebar do app principal
+- Scrollbar com suporte a dark mode
+- Override da classe `.no-scrollbar` do Tailwind
+
 ### Traduções PT-BR
 - **Super Admin**: Login, Dashboard, Settings, Accounts, Users
 - **Navegação**: Menus laterais e superiores
@@ -99,38 +114,54 @@ v4-connect-chatwoot/
 │                    WORKFLOW DE DESENVOLVIMENTO                  │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  1. Criar feature branch a partir de 'develop'                  │
-│     └── git checkout develop                                    │
-│     └── git checkout -b feature/minha-feature                   │
+│  OPÇÃO A: Mudanças pequenas (direto no develop)                 │
+│  ─────────────────────────────────────────────                  │
+│  1. git checkout develop                                        │
+│  2. Fazer alterações e testar (container ou quick-test.sh)      │
+│  3. git commit && git push origin develop                       │
+│  4. Pular para passo 6                                          │
 │                                                                 │
-│  2. Fazer alterações e testar localmente                        │
-│     └── ./scripts/quick-test.sh                                 │
+│  OPÇÃO B: Features grandes (feature branch)                     │
+│  ──────────────────────────────────────────                     │
+│  1. git checkout develop                                        │
+│  2. git checkout -b feature/minha-feature                       │
+│  3. Fazer alterações e testar                                   │
+│  4. git push origin feature/minha-feature                       │
+│  5. PR feature → develop                                        │
+│     └── Review de código                                        │
+│     └── Merge após aprovação                                    │
 │                                                                 │
-│  3. Push para origin                                            │
-│     └── git push origin feature/minha-feature                   │
-│                                                                 │
-│  4. Criar PR para 'develop'                                     │
-│     └── GitHub Actions builda (sem push para registry)          │
-│     └── Validar se build passou                                 │
-│                                                                 │
-│  5. Merge para 'develop' após aprovação                         │
-│                                                                 │
-│  6. Quando pronto para produção: PR develop → main              │
-│     └── GitHub Actions builda + push para GHCR                  │
-│                                                                 │
-│  7. Na VPS: executar deploy                                     │
+│  PRODUÇÃO (ambas opções)                                        │
+│  ───────────────────────                                        │
+│  6. PR develop → main                                           │
+│     └── Build valida (sem push GHCR)                            │
+│     └── Aguardar build passar                                   │
+│  7. Merge do PR → gera push para main                           │
+│     └── Push dispara build + push GHCR                          │
+│  8. Deploy na VPS                                               │
 │     └── ./scripts/deploy.sh                                     │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Branches
+### Branches e Builds
 
-| Branch | Propósito | Build | Push GHCR |
-|--------|-----------|-------|-----------|
-| `main` | Produção | ✅ | ✅ |
-| `develop` | Desenvolvimento | ✅ | ❌ |
-| `feature/*` | Features | Via PR | ❌ |
+| Ação | Branch origem | Branch destino | Build? | Push GHCR? |
+|------|---------------|----------------|--------|------------|
+| PR | `develop` | `main` | ✅ Valida código do develop | ❌ |
+| Push (merge) | - | `main` | ✅ Build completo | ✅ |
+| PR | `feature/*` | `develop` | ❌ | ❌ |
+| Push direto | - | `develop` | ❌ | ❌ |
+
+> **Resumo:** O build só roda em PRs que **apontam para main**. O código validado é o da branch origem (develop).
+
+### Quando usar cada opção
+
+| Tipo de mudança | Branch | Exemplo |
+|-----------------|--------|---------|
+| CSS, tradução, fix pequeno | develop direto | Ajustar cor, corrigir texto |
+| Feature nova, refactor | feature branch | Dark mode, nova página |
+| Documentação | develop direto | Atualizar README |
 
 ## Build da Imagem
 
@@ -256,11 +287,15 @@ docker exec chatwoot-dev-rails-1 sh -c "cat /app/config/locales/super_admin.pt-B
 
 O dark mode do Super Admin é implementado via CSS inline no layout. O script `convert_views_to_i18n.sh` injeta:
 
-1. **Bloco `<style>`** com todas as regras CSS de dark mode
-2. **Bloco `<script>`** com:
-   - Detecção de tema salvo no localStorage
+1. **Bloco `<style>`** com todas as regras CSS de dark mode (~100 regras)
+2. **Bloco de informações do usuário** no sidebar:
+   - Nome e email do super admin logado
+   - Botões de toggle de tema (sol/lua/monitor)
+3. **Bloco `<script>`** com:
+   - Detecção de tema salvo no localStorage (`super-admin-theme`)
    - Toggle de tema (claro/escuro/sistema)
    - Listeners para mudança de preferência do sistema
+   - Highlight visual do botão ativo
 
 **Paleta de cores (igual ao app principal):**
 | Token | Cor | Uso |
@@ -470,6 +505,23 @@ Quando o submenu expande além do viewport:
 }
 ```
 
+### Styled scrollbar não aparece no app principal
+
+O sidebar do app principal usa a classe `.no-scrollbar` do Tailwind que esconde a scrollbar. Para mostrar uma scrollbar estilizada:
+
+```css
+/* Override no-scrollbar para mostrar styled scrollbar */
+.no-scrollbar::-webkit-scrollbar { display: block !important; width: 6px !important; }
+.no-scrollbar::-webkit-scrollbar-track { background: transparent !important; }
+.no-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2) !important; border-radius: 3px !important; }
+.no-scrollbar { scrollbar-width: thin !important; scrollbar-color: rgba(0,0,0,0.2) transparent !important; }
+
+/* Dark mode */
+.dark .no-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2) !important; }
+```
+
+Este CSS é injetado no `vueapp.html.erb` pelo `build_v4_connect_image.sh`.
+
 ### Fundo branco aparece ao scrollar
 
 O layout Administrate força `background-color: #fff` no `html`. Solução:
@@ -507,6 +559,34 @@ O arquivo YAML deve ter encoding UTF-8:
 file locales/super_admin.pt-BR.yml
 # Deve mostrar: UTF-8 Unicode text
 ```
+
+## Integrações
+
+### WhatsApp via Evolution API
+
+O V4 Connect pode ser integrado ao **Evolution API** para atendimento via WhatsApp.
+
+📖 **[Guia Completo de Integração](docs/EVOLUTION_API_INTEGRATION.md)**
+
+Principais recursos:
+- Receber e enviar mensagens do WhatsApp
+- Sincronização de contatos e histórico
+- Suporte a múltiplos números
+- Assinatura automática do atendente
+
+### Captain (Copiloto de IA)
+
+O V4 Connect inclui o **Captain**, um sistema de IA para atendimento inteligente.
+
+📖 **[Guia de Configuração do Captain](docs/CAPTAIN_AI_SETUP.md)**
+
+Principais recursos:
+- **Assistant**: Bot que responde clientes automaticamente
+- **Copilot**: Assistente que ajuda agentes com sugestões
+- **FAQs**: Geração automática de perguntas frequentes
+- **Memories**: Memória contextual de clientes
+
+---
 
 ## Baseado no Chatwoot
 

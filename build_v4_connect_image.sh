@@ -658,6 +658,33 @@ if [ -f "$FEATURES_FILE" ]; then
   echo "  - WhatsApp Campaign habilitado"
 fi
 
+echo "Criando initializer para desabilitar verificação de licença..."
+cat > config/initializers/v4_connect_license.rb << 'EOF'
+# V4 Connect - Desabilita verificação de licença do Chatwoot Hub
+# Força plano 'enterprise' e desabilita reset de features premium
+
+Rails.application.config.after_initialize do
+  ChatwootHub.class_eval do
+    def self.pricing_plan
+      'enterprise'
+    end
+
+    def self.pricing_plan_quantity
+      999
+    end
+  end
+
+  if defined?(Internal::ReconcilePlanConfigService)
+    Internal::ReconcilePlanConfigService.class_eval do
+      def perform
+        Redis::Alfred.delete(Redis::Alfred::CHATWOOT_INSTALLATION_CONFIG_RESET_WARNING) if defined?(Redis::Alfred)
+      end
+    end
+  end
+end
+EOF
+echo "  - config/initializers/v4_connect_license.rb criado"
+
 echo "Copiando rake task V4 Connect..."
 cp "${BUILD_ROOT}/lib/tasks/v4_connect.rake" "lib/tasks/"
 echo "  - lib/tasks/v4_connect.rake copiado"
@@ -691,5 +718,6 @@ Imagem pronta com customizacoes V4 Connect:
 - Atribuição de Agentes em PT-BR
 - Sidebar Settings em PT-BR
 - Brand assets customizados
+- Verificação de licença desabilitada (plano enterprise)
 ============================================================
 EOF
